@@ -7,7 +7,8 @@
         <client_callable>false</client_callable>
         <description/>
         <name>DLAUtil</name>
-        <script><![CDATA[/* global Class, GlideRecord, global, GlideScopedEvaluator, gs, XMLDocument2, GlideDateTime */
+        <script><![CDATA[/* global Class, GlideRecord, GlideScopedEvaluator, XMLDocument2 */
+/* global global, gs */
 /* eslint no-undef: "error" */
 var DLAUtil = Class.create();
 DLAUtil.prototype = {
@@ -15,100 +16,129 @@ DLAUtil.prototype = {
 		
     },
 	
-	_getHistoricRecord: function (recordTable, recordSysID, date, fields) {
-		function counterToGDT(s) {
-			var ms = parseInt(s.slice(0, -7), 16);
-			var gdt = new GlideDateTime();
-			gdt.setValue(ms);
-			return gdt;
+	getHistoricACLs: function (tableName, date) {
+		let acls = this._execScript('global',
+			'(function () {' +
+				'var acls = {};' +
+				'var aclGr = new GlideRecord("sys_security_acl");' +
+				'aclGr.addQuery("type", "record");' +
+				'aclGr.addQuery("operation", "read");' +
+				'aclGr.addQuery("name", tableName);' +
+				'aclGr.addQuery("sys_updated_on", "<=", date);' +
+				'aclGr.query();' +
+				'while (aclGr.next()) {' +
+					'var aclSysID = aclGr.getUniqueValue();' +
+					'acls[aclSysID] = {' +
+						'sys_id: aclSysID,' +
+						'sys_scope: aclGr.getValue("sys_scope"),' +
+						'active: !!aclGr.active,' +
+						'condition: aclGr.condition.toString(),' +
+						'advanced: !!aclGr.advanced,' +
+						'script: aclGr.script.toString(),' +
+						'roles: []' +
+					'};' +
+				'}' +
+				'return acls;' +
+			'})();', { tableName: tableName, date: date });
+
+		// add roles to known ACLs
+		acls = this._execScript('global',
+			'(function () {' +
+				'var aclRoleGr = new GlideRecord("sys_security_acl_role");' +
+				'aclRoleGr.addQuery("sys_security_acl", "IN", Object.keys(acls));' +
+				'aclRoleGr.addQuery("sys_updated_on", "<=", date);' +
+				'aclRoleGr.addNotNullQuery("sys_user_role");' +
+				'aclRoleGr.query();' +
+				'while (aclRoleGr.next()) {' +
+					'var roleName = aclRoleGr.sys_user_role.name.toString();' +
+					'if (roleName) {' +
+						'var aclSysID = aclRoleGr.getValue("sys_security_acl");' +
+						'var acl = acls[aclSysID];' +
+						'if (acl.roles.indexOf(roleName) == -1) {' +
+							'acl.roles.push(roleName);' +
+						'}' +
+					'}' +
+				'}' +
+				'return acls;' +
+			'})();', { acls: acls, date: date });
+
+		// (virtually) restore deleted ACLs
+		acls = this._execScript('global',
+			'(function () {' +
+				'var gdt = new GlideDateTime(date);' +
+				'var ms = gdt.getNumericValue();' +
+				'var dateCounter = Number(ms).toString(16) + "0000001";' +
+				'var versionGr = new GlideRecord("sys_update_version");' +
+				'versionGr.addQuery("name", "STARTSWITH", "sys_security_acl");' +
+				'versionGr.addQuery("sys_recorded_at", "<=", dateCounter);' +
+				'versionGr.addQuery("record_name", tableName);' +
+				'Object.keys(acls).forEach(function (aclSysID) {' +
+					'versionGr.addQuery("name", "!=", "sys_security_acl_" + aclSysID);' +
+				'});' +
+				'versionGr.orderByDesc("sys_recorded_at");' +
+				'versionGr.query();' +
+				'while (versionGr.next()) {' +
+					'var xml = new XMLDocument2();' +
+					'xml.parseXML(versionGr.payload);' +
+					'var aclSysID = xml.getNodeText("//record_update/sys_security_acl/sys_id");' +
+					'if (aclSysID in acls) {' +
+						'continue;' +
+					'} else if (versionGr.action == "INSERT_OR_UPDATE") {' +
+						'var operation = xml.getNodeText("//record_update/sys_security_acl/operation");' +
+						'var type = xml.getNodeText("//record_update/sys_security_acl/type");' +
+						'if (operation != "read" || type != "record") {' +
+							'continue;' +
+						'}' +
+						'acls[aclSysID] = {' +
+							'sys_id: aclSysID,' +
+							'sys_scope: xml.getNodeText("//record_update/sys_security_acl/sys_scope"),' +
+							'active: xml.getNodeText("//record_update/sys_security_acl/active") == "true",' +
+							'condition: xml.getNodeText("//record_update/sys_security_acl/condition"),' +
+							'advanced: xml.getNodeText("//record_update/sys_security_acl/advanced") == "true",' +
+							'script: xml.getNodeText("//record_update/sys_security_acl/script"),' +
+							'roles: []' +
+						'};' +
+					'}' +
+				'}' +
+				'return acls;' +
+			'})();', { acls: acls, tableName: tableName, date: date });
+		
+		// restore deleted ACL Roles
+		for (let acl in acls) {
+			acls = this._execScript('global',
+				'(function () {' +
+					'var gdt = new GlideDateTime(date);' +
+					'var ms = gdt.getNumericValue();' +
+					'var dateCounter = Number(ms).toString(16) + "0000001";' +
+					'var versionGr = new GlideRecord("sys_update_version");' +
+					'versionGr.addQuery("name", "STARTSWITH", "sys_security_acl_role");' +
+					'versionGr.addQuery("sys_recorded_at", "<=", dateCounter);' +
+					'versionGr.orderByDesc("sys_recorded_at");' +
+					'versionGr.query();' +
+					'while (versionGr.next()) {' +
+						'var xml = new XMLDocument2();' +
+						'xml.parseXML(versionGr.payload);' +
+						'if (versionGr.action == "INSERT_OR_UPDATE") {' +
+							'var aclSysID = xml.getNodeText("//record_update/sys_security_acl_role/sys_security_acl");' +
+							'if (aclSysID in acls) {' +
+								'var node = xml.getNode("//record_update/sys_security_acl_role/sys_user_role");' +
+								'if (node) {' +
+									'var roleName = node.getAttribute("display_value");' +
+									'if (roleName) {' +
+										'var acl = acls[aclSysID];' +
+										'if (acl.roles.indexOf(roleName) == -1) {' +
+											'acl.roles.push(roleName);' +
+										'}' +
+									'}' +
+								'}' +
+							'}' +
+						'}' +
+					'}' +
+					'return acls;' +
+				'})();', { acls: acls, date: date });
 		}
 		
-		const recordData = this._execScript('global',
-			'(function () {'
-				+ 'var anyGr = new GlideRecord(recordTable);'
-				+ 'anyGr.addQuery("sys_id", recordSysID);'
-				+ 'anyGr.addQuery("sys_updated_on", "<=", date);'
-				+ 'anyGr.setLimit(1);'
-				+ 'anyGr.query();'
-				+ 'if (anyGr.next()) {'
-					+ 'var historicData = {};'
-					+ 'for (var i = 0; i < fields.size(); i++) {'
-						+ 'var field = fields.get(i);'
-						+ 'var ge = anyGr.getElement(field);'
-						+ 'if (ge != null) {'
-							+ 'historicData[field] = {'
-								+ 'value: ge.toString(),'
-								+ 'display_value: ge.getDisplayValue()'
-							+ '};'
-						+ '}'
-					+ '}'
-					+ ''
-					+ 'return historicData;'
-				+ '}'
-				+ '' // record was modified *after* 'date', need to retrieve data from 'sys_update_version'
-				+ 'var gdt = new GlideDateTime(date);'
-				+ 'var ms = gdt.getNumericValue();'
-				+ 'var dateCounter = Number(ms).toString(16) + "0000001";'
-				+ 'gs.info(date + " <-> " + new GlideDateTime(date) + " <-> " + dateCounter);'	
-				+ 'var versionGr = new GlideRecord("sys_update_version");'
-				+ 'versionGr.addQuery("name", recordTable + "_" + recordSysID);'
-				+ 'versionGr.addQuery("sys_recorded_at", "<=", dateCounter);'
-				+ 'versionGr.orderByDesc("sys_recorded_at");'
-				+ 'versionGr.setLimit(1);'
-				+ 'versionGr.query();'
-				+ 'if (versionGr.next()) {'
-					+ 'if (versionGr.action == "INSERT_OR_UPDATE") {'
-						+ 'var xml = new XMLDocument2();'
-						+ 'xml.parseXML(versionGr.payload);'
-						+ 'var historicData = {};'
-						+ 'for (var i = 0; i < fields.size(); i++) {'
-							+ 'var f = fields.get(i);'
-							+ 'var node = xml.getNode("//" + recordTable + "/" + f);'
-							+ 'if (node) {'
-								+ 'historicData[f] = { value: node.getTextContent() };'
-								+ 'var attrs = node.getAttributes();'
-								+ 'for (var attr in attrs) {'
-									+ 'historicData[f].attr = attrs[attr];'
-								+ '}'
-							+ '}'
-							//+ 'historicData[f] = xml.getNodeText("//" + recordTable + "/" + f);'
-						+ '}'
-						+ 'return historicData;'
-					+ '}'
-				+ '}'
-				+ ''// record was deleted or did not exist at 'date'
-				+ 'return null;'
-			+ '})();', {
-			recordTable: recordTable,
-			recordSysID: recordSysID,
-			date: date,
-			fields: fields
-		});
-		
-		return recordData;
-	},
-	
-	getACLConfiguration: function (aclSysID, date) {
-		const aclGr = new GlideRecord('sys_security_acl');
-		aclGr.addQuery('sys_id', aclSysID);
-		aclGr.addQuery('sys_updated_on', '<=', date);
-		aclGr.setLimit(1);
-		aclGr.query();
-		
-		const aclData = this._getHistoricRecord('sys_security_acl', aclSysID, date, ['name', 'active', 'condition']);
-		if (aclData) {
-			aclData.roles = '';
-			
-			// name, condition and active flag are now the history information from time of 'date'
-			const aclRoleGr = new GlideRecord('sys_security_acl_role');
-			aclRoleGr.addQuery('sys_security_acl', aclSysID);
-			aclRoleGr.query();
-			while (aclRoleGr.next()) {
-				const aclRoleData = this._getHistoricRecord('sys_security_acl_role', aclRoleGr.getUniqueValue(), )
-			}
-		}
-		
-		return aclData;
+		return Object.keys(acls).map(aclSysID => acls[aclSysID]);
 	},
 	
 	exportRecordXML: function (recordTable, recordSysID) {
@@ -148,7 +178,7 @@ DLAUtil.prototype = {
 		return null;
 	},
 	
-	_execScript: function (scope, script, vars) {
+	_execScript: function (scope, script, vars, resultVariable) {
 		const scriptGr = new GlideRecord('sys_rte_eb_script_operation');
 		scriptGr.addQuery('sys_id', '9c8bdb7c978a71103c2d3f56f053afef');
 		scriptGr.setLimit(1);
@@ -156,7 +186,20 @@ DLAUtil.prototype = {
 		if (scriptGr.next()) {
 			scriptGr.sys_scope = scope;
 			scriptGr.script = script;
-			return new GlideScopedEvaluator().evaluateScript(scriptGr, 'script', vars);
+			
+			const gse = new GlideScopedEvaluator();
+			if (vars) {
+				for (let name in vars) {
+					gse.putVariable(name, vars[name]);
+				}
+			}
+			
+			const result = gse.evaluateScript(scriptGr, 'script');
+			if (resultVariable) {
+				return gse.getVariable(resultVariable);
+			}
+			
+			return result;
 		} else {
 			gs.error('[DLA] No Script Injection possible!');
 		}
@@ -273,16 +316,7 @@ DLAUtil.prototype = {
 			breached: []
 		};
 		
-		// static value for the *-ACL behaviour (depends on glide.sm.default_mode)
-		const defaultReadACLAllowsPublicRead = true;
-		const renderSizeProbability100 = 40000;
-		const renderSizeProbability10 = 9000;
-		const leakProbability = function (renderSize) {
-			const normalizedSize = (renderSize - renderSizeProbability10) / 
-				(renderSizeProbability100 - renderSizeProbability10);
-			
-			return Math.floor(Math.min(0.1 + normalizedSize, 1) * 100);
-		};
+		// widget-sys-id to widget-id map
 		const widgetCache = {};
 		const getWidgetSysId = function (widgetIdOrSysId) {
 			if (widgetIdOrSysId in widgetCache) {
@@ -301,125 +335,86 @@ DLAUtil.prototype = {
 			return '';
 		};
 		
-		// required to query on syslog_transaction which by default is only possible via global scope
+		// need to query syslog_transaction via global-script (by default this table is global access only)
 		const transData = this._execScript('global',
-			'(function () {'
-				+ 'var transURLs = [];'
-				+ 'var transGr = new GlideRecord("syslog_transaction");'
-				+ 'transGr.addQuery("sys_created_by", "guest");'
-				+ 'transGr.addQuery("url", "STARTSWITH", "/api/now/sp/widget");'
-				// the Render size (uncompressed chars) is an indication whether actual data has been returned
-				//+ 'transGr.addQuery("render_size", ">", ' + renderSizeProbability10 + ');'
-				+ 'transGr.orderByDesc("start_process_at");'
-				+ 'transGr.query();'
-				+ 'while (transGr.next()) {'
-					+ 'var url = transGr.url.toString();'
-					+ 'if (url.indexOf("/api/now/sp/widget/widget-modal") == 0) { continue; }'
-					+ 'transURLs.push({'
-						+ 'sys_id: transGr.getUniqueValue(),'
-						+ 'url: url,'
-						+ 'size: +transGr.render_size,'
-						+ 'date: transGr.start_process_at.toString()'
-					+ '});'
-				+ '}'
-				+ 'return transURLs;'
-			+ '})();'
+			'(function () {' +
+				'var transURLs = [];' +
+				'var transGr = new GlideRecord("syslog_transaction");' +
+				'transGr.addQuery("sys_created_by", "guest");' +
+				'transGr.addQuery("url", "STARTSWITH", "/api/now/sp/widget");' +
+				'transGr.orderByDesc("start_process_at");' +
+				'transGr.query();' +
+				'while (transGr.next()) {' +
+					'var url = transGr.url.toString();' +
+					// widget-modal is embedding other widgets, but this will not bypass the public check
+					'if (url.indexOf("/api/now/sp/widget/widget-modal") == 0) {' +
+						'continue;' +
+					'}' +
+					'transURLs.push({' +
+						'sys_id: transGr.getUniqueValue(),' +
+						'url: url,' +
+						'size: +transGr.render_size,' +
+						'date: transGr.start_process_at.toString()' +
+					'});' +
+				'}' +
+				'return transURLs;' +
+			'})();'
 		);
-			
+		
 		const regex = /^[/]?api\/now\/sp\/widget\/(.*?)\?.*(?:t|table)=(.*?)(?:&|$)/;
-		const aclUtil = new global.SNCACLUtil();
 		const widgetSimpleListSysID = '5b255672cb03020000f8d856634c9c28';
 		for (let i = 0; i < transData.length; i++) {
 			const match = transData[i].url.match(regex);
 			if (match) {
 				const widget = match[1];
 				const table = match[2];
+				
+				const tableGr = new GlideRecord('sys_db_object');
+				tableGr.addQuery('name', table);
+				tableGr.setLimit(1);
+				tableGr.query();
+				if (!tableGr.hasNext()) {
+					analysisResult.prevented.push({
+						widget: getWidgetSysId(widget),
+						table: table,
+						transaction: transData[i].sys_id,
+						reason: 'invalid table accessed',
+						attempt_date: transData[i].date,
+						leak_size: transData[i].size,
+						acls: []
+					});
+					continue;
+				}
+				
+				const acls = this.getHistoricACLs(table, transData[i].date);
+				
 				// special case 'widget-simple-list': since March 2023, there is a 'public-access' which prevents leaks!
 				if (widget == 'widget-simple-list' || widget == widgetSimpleListSysID) {
-					if (!aclUtil.hasPublicAccess(table)) {
+					if (acls.length && !acls.some(acl => acl.roles.length == 0 || acl.roles.indexOf('public') != -1)) {
 						// if the table is not 'public', the simple list widget hasn't returned any results
 						// and as such the current table isn't subjected to a data leak (at least not through this widget)
 						analysisResult.prevented.push({
 							widget: getWidgetSysId(widget),
 							table: table,
 							transaction: transData[i].sys_id,
-							reason: 'protected by "widget-simple-list" hasPublicAccess',
+							reason: 'protected by SNCACLUtil::hasPublicAccess',
 							attempt_date: transData[i].date,
-							leak_size: transData[i].size
+							leak_size: transData[i].size,
+							acls: acls
 						});
 						continue;
 					}
 				}
 				
-				if (transData[i].size <= renderSizeProbability10) {
-					continue;
-				}
-
-				// the probability is misleading: it is not a real probability, but a scaling of the render size
-//				const breachedProbability = leakProbability(transData[i].size);
-				// 22-Oct-2023 MKR: Return all breaches (not only the most likely)
-// 				const tableBreachedIndex = affectedTables.breached.findIndex(x => x.widget == widget && x.table == table);
-// 				if (tableBreachedIndex != -1) {
-// 					// we only need the most severe breach
-// 					if (affectedTables.breached[tableBreachedIndex].prob >= breachedProbability) {
-// 						continue;
-// 					} else {
-// 						affectedTables.breached.splice(tableBreachedIndex, 1);
-// 					}
-// 				}
-
-				const aclGr = new GlideRecord('sys_security_acl');
-				aclGr.addQuery('type', 'record');
-				aclGr.addQuery('name', table);
-				aclGr.addQuery('operation', 'read');
-				aclGr.query();
-
-				let reason = 'public access possible';
-				let breached = false;
-				if (aclGr.hasNext()) {
-					while (aclGr.next()) {
-						const aclScript = aclGr.script.toString();
-						const hasPublicRole = this.aclHasRole(aclGr.sys_id, 'public');
-						const hasRoles = this.aclHasRoles(aclGr.sys_id);
-						if (!aclScript && (hasPublicRole || !hasRoles)) {
-							// still leaking!
-							breached = true;
-						} else {
-							if (aclScript.contains('glide.security.allow_unauth_roleless_acl')) {
-								// the ACL was patched by ServiceNow (most likely)
-								// this means that this ACL has (or had at the time of the patch) no valid role assigned,
-								// no condition and no script
-								if (aclGr.sys_upated_on > transData[i].date) {
-									// at the time the transaction happened, the ACL was most likely leaking
-									breached = true;
-								} else {
-									// at the time the transaction happened, the ACL was already patched
-									breached = false;
-								}
-							} else if (hasPublicRole || !hasRoles) {
-								breached = true;
-							}
-						}
-							
-						if (breached) {
-							break;
-						}
-					}
-				} else {
-					breached = defaultReadACLAllowsPublicRead;
-				}
-
-				if (breached) {
-					analysisResult.breached.push({
-						widget: getWidgetSysId(widget),
-						table: table,
-						transaction: transData[i].sys_id,
-						reason: reason,
-						leak_size: transData[i].size,
-						//probability: breachedProbability,
-						attempt_date: transData[i].date
-					});
-				}
+				analysisResult.breached.push({
+					widget: getWidgetSysId(widget),
+					table: table,
+					transaction: transData[i].sys_id,
+					reason: 'public access ',
+					leak_size: transData[i].size,
+					attempt_date: transData[i].date,
+					acls: acls
+				});
 			}
 		}
 		
@@ -432,13 +427,13 @@ DLAUtil.prototype = {
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2023-10-20 16:17:18</sys_created_on>
         <sys_id>7ac95274978671103c2d3f56f053af95</sys_id>
-        <sys_mod_count>63</sys_mod_count>
+        <sys_mod_count>98</sys_mod_count>
         <sys_name>DLAUtil</sys_name>
         <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
         <sys_policy/>
         <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
         <sys_update_name>sys_script_include_7ac95274978671103c2d3f56f053af95</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2023-10-24 19:05:06</sys_updated_on>
+        <sys_updated_on>2023-10-27 01:52:18</sys_updated_on>
     </sys_script_include>
 </record_update>

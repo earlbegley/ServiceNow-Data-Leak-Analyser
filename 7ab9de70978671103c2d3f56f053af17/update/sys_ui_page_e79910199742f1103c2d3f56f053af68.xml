@@ -7,10 +7,16 @@
         <endpoint>x_376096_dla_analyse_widgets.do</endpoint>
         <html><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
 <j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
-	<g:evaluate var="jvar_refresh" expression="RP.getParameterValue('refresh')" />
-	<j:if test="${!empty(jvar_refresh)}">
+	<g2:evaluate var="jvar_refresh" expression="RP.getParameterValue('refresh')" />
+	<j2:if test="$[!empty(jvar_refresh)]">
 		<script>
 			(function refreshReportTable() {
+				document.querySelectorAll(".header-icon.icon-refresh").forEach(function (element) {
+					element.click();
+				});
+			
+				return;
+			
 				// as the page is reloaded after a click on "Analyse ACLs", the report table will
 				// be always "up-to-date"
 				var parentWindow = window.parent;
@@ -28,8 +34,9 @@
 				}
 			})();
 		</script>
-	</j:if>
+	</j2:if>
 	<g2:evaluate>
+		const skipAnalysis = RP.getParameterValue('skip_analysis') == 'true';
 		let runWidgetAnalysis = false;
 		let buttonLabel = 'Analyse Widgets';
 		const widgetResultGr = new GlideRecord('x_376096_dla_widget_result');
@@ -37,7 +44,7 @@
 		widgetResultGr.query();
 		if (widgetResultGr.hasNext()) {
 			buttonLabel = 'Re-Analyse Widgets';
-		} else {
+		} else if (!skipAnalysis) {
 			runWidgetAnalysis = true;
 		}
 	</g2:evaluate>
@@ -101,19 +108,20 @@
 	widgetResultGr.setValue('work_notes', 'Task has been closed as the affected Widget is no longer included in the latest Widget analysis.');
 	widgetResultGr.updateMultiple();
 	
-	response.sendRedirect('x_376096_dla_analyse_widgets.do?refresh=true');
+	// prevent refresh loop when there analysis hasn't yielded any results
+	response.sendRedirect('x_376096_dla_analyse_widgets.do?refresh=true&skip_analysis=' + String(widgets.length == 0));
 }).call(this, request, response);]]></processing_script>
         <sys_class_name>sys_ui_page</sys_class_name>
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2023-10-21 17:26:55</sys_created_on>
         <sys_id>e79910199742f1103c2d3f56f053af68</sys_id>
-        <sys_mod_count>22</sys_mod_count>
+        <sys_mod_count>31</sys_mod_count>
         <sys_name>analyse_widgets</sys_name>
         <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
         <sys_policy/>
         <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
         <sys_update_name>sys_ui_page_e79910199742f1103c2d3f56f053af68</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2023-10-24 18:47:02</sys_updated_on>
+        <sys_updated_on>2023-10-26 11:30:12</sys_updated_on>
     </sys_ui_page>
 </record_update>

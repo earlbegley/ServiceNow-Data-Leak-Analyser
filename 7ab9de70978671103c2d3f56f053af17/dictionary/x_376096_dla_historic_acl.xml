@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element db_object_id="b42353ba97cab9103c2d3f56f053afc5" label="Historic ACL" max_length="40" name="x_376096_dla_historic_acl" type="collection">
+        <element label="Access token" max_length="40" name="access_token" type="string"/>
+        <element label="Action" max_length="4000" name="action" type="glide_action_list"/>
+        <element label="Active" max_length="40" name="active" type="boolean"/>
+        <element label="Advanced" max_length="40" name="advanced" type="boolean"/>
+        <element dependent="leak_result.table" dependent_on_field="leak_result.table" label="Condition" max_length="4000" name="condition" type="conditions" use_dependent_field="true"/>
+        <element label="Leaked records" max_length="40" name="leaked_records" type="integer"/>
+        <element label="Leak Result" max_length="32" name="leak_result" reference="x_376096_dla_leak_result" reference_cascade_rule="cascade" type="reference"/>
+        <element display="true" label="Original ACL" max_length="32" name="original_acl" reference="sys_security_acl" type="reference"/>
+        <element choice="1" default="unknown" label="Risk" max_length="40" name="risk" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="High" sequence="1" value="high"/>
+                <element inactive_on_update="false" label="Medium" sequence="2" value="medium"/>
+                <element inactive_on_update="false" label="Low" sequence="3" value="low"/>
+                <element inactive_on_update="false" label="Unknown" sequence="4" value="unknown"/>
+            </choice>
+        </element>
+        <element label="Roles" max_length="40" name="roles" type="string"/>
+        <element label="Scope" max_length="32" name="scope" reference="sys_scope" type="reference"/>
+        <element label="Script" max_length="8000" name="script" type="script"/>
+        <index name="index">
+            <element name="leak_result"/>
+        </index>
+        <index name="index2">
+            <element name="original_acl"/>
+        </index>
+        <index name="index3">
+            <element name="scope"/>
+        </index>
+    </element>
+</database>
