@@ -6,59 +6,64 @@
         <client_script_v2><![CDATA[function onClick(g_form) {
 
 }]]></client_script_v2>
-        <comments>This is the UI Action for the embedded Historic ACL list</comments>
-        <condition>current.canWrite()</condition>
-        <form_action>true</form_action>
-        <form_button>true</form_button>
+        <comments/>
+        <condition>new x_376096_dla.DLAUIActionUtil().showPublicACLsUIActionVisible(current, typeof parent != 'undefined' ? parent : null, gs.action, RP);</condition>
+        <form_action>false</form_action>
+        <form_button>false</form_button>
         <form_button_v2>false</form_button_v2>
         <form_context_menu>false</form_context_menu>
         <form_link>false</form_link>
         <form_menu_button_v2>false</form_menu_button_v2>
-        <form_style>primary</form_style>
+        <form_style/>
         <format_for_configurable_workspace>false</format_for_configurable_workspace>
         <hint/>
-        <isolate_script>false</isolate_script>
-        <list_action>false</list_action>
-        <list_banner_button>false</list_banner_button>
+        <isolate_script>true</isolate_script>
+        <list_action>true</list_action>
+        <list_banner_button>true</list_banner_button>
         <list_button>false</list_button>
         <list_choice>false</list_choice>
         <list_context_menu>false</list_context_menu>
         <list_link>false</list_link>
         <list_save_with_form_button>false</list_save_with_form_button>
         <list_style/>
-        <messages/>
-        <name>Analyze Access</name>
-        <onclick>analyseHistoricACL()</onclick>
+        <messages>dla_no_public_acls_found</messages>
+        <name>Filter Public</name>
+        <onclick>filterPublicACLs();</onclick>
         <order>100</order>
-        <script><![CDATA[/* global current, action, x_376096_dla, gs, GlideAjax, rowSysId, g_form, GlideModal, g_list */
+        <script><![CDATA[/* global g_list, g_form, jslog, nowapi, GlideAjax, getMessages, GlideModal */
 /* eslint no-undef: "error" */
-function analyseHistoricACL() {
+function filterPublicACLs() {
+	var query = g_list.getQuery();
 	var ga = new GlideAjax('x_376096_dla.DLAUtilClient');
-	ga.addParam('sysparm_name', 'analyseHistoricACL');
-	
-	if (typeof rowSysId != 'undefined') {
-		ga.addParam('historic_acl', rowSysId);
-		
-	} else {
-		ga.addParam('historic_acl', g_form.getUniqueValue());
-	}
-	
+	ga.addParam('sysparm_name', 'filterPublicACLs');
+	ga.addParam('data_leak', g_form.getUniqueValue());
+	ga.addParam('filter', g_list.getQuery());
 	ga.getXMLAnswer(function (result) {
 		result = JSON.parse(result);
 		if (result.status == 'success') {
-			var dd = new GlideModal('hierarchical_progress_viewer', false, '40em', '10em');
-			dd.setTitle('Status');
-			dd.setPreference('sysparm_renderer_execution_id', result.tracker_id);
-			dd.on("beforeclose", function () {
-				if (typeof g_list != 'undefined') {
+			if (result.public_acls) {
+				if (result.all_public) {
+					info('dla_all_acls_public');
+				} else {
+					g_list.addFilter('sys_idIN' + result.public_acls.join(','));
 					g_list.refresh();
 				}
-			});
-			dd.render();
+			} else {
+				info('dla_no_public_acls_found');
+			}		
 		} else if (result.message) {
-			g_form.addErrorMessage(result.message);
+			jslog(result.message);
 		}
 	});
+	
+	function info(msg_key) {
+		nowapi.g_i18n.getMessages(['Warning', msg_key], function (msgs) {
+			var dialog = new GlideModal('glide_warn', false);
+			dialog.setTitle(msgs['Info']);
+			dialog.setPreference('title', msgs[msg_key]);
+			dialog.render();
+		});
+	}
 }]]></script>
         <show_insert>false</show_insert>
         <show_multiple_update>false</show_multiple_update>
@@ -66,20 +71,20 @@ function analyseHistoricACL() {
         <show_update>true</show_update>
         <sys_class_name>sys_ui_action</sys_class_name>
         <sys_created_by>admin</sys_created_by>
-        <sys_created_on>2023-10-27 08:02:09</sys_created_on>
+        <sys_created_on>2023-10-28 08:17:37</sys_created_on>
         <sys_domain>global</sys_domain>
         <sys_domain_path>/</sys_domain_path>
-        <sys_id>c402d10f9706f9103c2d3f56f053af4f</sys_id>
-        <sys_mod_count>13</sys_mod_count>
-        <sys_name>Analyze Access</sys_name>
+        <sys_id>1cce9257970e3d103c2d3f56f053af55</sys_id>
+        <sys_mod_count>30</sys_mod_count>
+        <sys_name>Filter Public</sys_name>
         <sys_overrides/>
         <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
         <sys_policy/>
         <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
-        <sys_update_name>sys_ui_action_c402d10f9706f9103c2d3f56f053af4f</sys_update_name>
+        <sys_update_name>sys_ui_action_1cce9257970e3d103c2d3f56f053af55</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2023-10-28 23:23:16</sys_updated_on>
-        <table>x_376096_dla_historic_acl</table>
+        <sys_updated_on>2023-10-28 16:19:58</sys_updated_on>
+        <table>sys_security_acl</table>
         <ui11_compatible>false</ui11_compatible>
         <ui16_compatible>false</ui16_compatible>
     </sys_ui_action>

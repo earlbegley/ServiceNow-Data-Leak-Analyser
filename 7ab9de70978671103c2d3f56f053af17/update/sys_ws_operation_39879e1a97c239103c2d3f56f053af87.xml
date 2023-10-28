@@ -8,7 +8,7 @@
         <http_method>GET</http_method>
         <name>Extract</name>
         <operation_script><![CDATA[/* global request, response */
-/* global gs, x_376096_dla, GlideRecord, GlideScopedEvaluator, GlideSysAttachment */
+/* global gs, x_376096_dla, GlideScriptedHierarchicalWorker, GlideRecord */
 /* eslint no-undef: "error" */
 (function process(/*RESTAPIRequest*/ request, /*RESTAPIResponse*/ response) {
 
@@ -29,6 +29,23 @@
 			if (historicAclGr.next()) {
 				historicAclGr.access_token = '';
 				historicAclGr.update();
+				
+				const worker = new GlideScriptedHierarchicalWorker();
+				worker.setProgressName('Public ACL Analysis: ' + historicACL);
+				worker.setScriptIncludeName('x_376096_dla.DLAACLAnalyser');
+				worker.setScriptIncludeMethod('analyseHistoricACL');
+				worker.putMethodArg('historicAclGr', historicAclGr);
+				worker.setBackground(true);
+				worker.start();
+
+				result.tracker_id = worker.getProgressID();
+				result.status = 'success';
+			} else {
+				result.message = gs.getMessage('dla_record_unauthorized_or_invalid_record');
+			}
+			/*
+			
+			
 				
 				if (!historicAclGr.active) {
 					historicAclGr.leaked_records = 0;
@@ -133,7 +150,7 @@
 				}
 			} else {
 				result.message = 'No Record found';
-			}
+			}*/
 		} else {
 			result.message = 'This API cannot be accessed without an Access Token!';
 		}
@@ -158,14 +175,14 @@
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2023-10-25 05:12:35</sys_created_on>
         <sys_id>39879e1a97c239103c2d3f56f053af87</sys_id>
-        <sys_mod_count>29</sys_mod_count>
+        <sys_mod_count>38</sys_mod_count>
         <sys_name>Extract</sys_name>
         <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
         <sys_policy/>
         <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
         <sys_update_name>sys_ws_operation_39879e1a97c239103c2d3f56f053af87</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2023-10-27 14:44:17</sys_updated_on>
+        <sys_updated_on>2023-10-28 22:44:48</sys_updated_on>
         <web_service_definition display_value="Extract Public">1c771e1a97c239103c2d3f56f053af5e</web_service_definition>
         <web_service_version/>
     </sys_ws_operation>

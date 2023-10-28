@@ -15,6 +15,16 @@ DLAUIActionUtil.prototype = {
 		this.dlaUtil = new x_376096_dla.DLAUtil();
     },
 	
+	showPublicACLsUIActionVisible: function (current, parent, action, RP) {
+		if (gs.hasRole('admin')) {
+			if (parent) {
+				return parent.getTableName() == 'x_376096_dla_leak_result';
+			}
+		}
+		
+		return false;
+	},
+	
 	testHistoricACL: function (historicAclGr) {
 		var rm = new sn_ws.RESTMessageV2();
 		rm.setHttpMethod('get');
@@ -31,13 +41,13 @@ DLAUIActionUtil.prototype = {
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2023-10-26 21:46:37</sys_created_on>
         <sys_id>060447f6978ab9103c2d3f56f053afee</sys_id>
-        <sys_mod_count>7</sys_mod_count>
+        <sys_mod_count>25</sys_mod_count>
         <sys_name>DLAUIActionUtil</sys_name>
         <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
-        <sys_policy>read</sys_policy>
+        <sys_policy/>
         <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
         <sys_update_name>sys_script_include_060447f6978ab9103c2d3f56f053afee</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2023-10-27 00:52:12</sys_updated_on>
+        <sys_updated_on>2023-10-28 17:18:19</sys_updated_on>
     </sys_script_include>
 </record_update>

@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <active>true</active>
+        <api_name>x_376096_dla.DLAUtilClient</api_name>
+        <caller_access/>
+        <client_callable>true</client_callable>
+        <description/>
+        <name>DLAUtilClient</name>
+        <script><![CDATA[var DLAUtilClient = Class.create();
+DLAUtilClient.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
+	initialize: function () {
+		global.AbstractAjaxProcessor.prototype.initialize.apply(this, arguments);
+		this.dlaUtil = new x_376096_dla.DLAUtil();
+    },
+	
+	getAnalysisStatus: function () {
+		const result = {
+			status: 'error',
+			message: ''
+		};
+		
+		const trackerID = this.getParameter('tracker_id');
+		if (trackerID) {
+			const trackerGr = new GlideRecordSecure('sys_execution_tracker');
+			trackerGr.addQuery('sys_id', trackerID);
+			trackerGr.setLimit(1);
+			trackerGr.query();
+			if (trackerGr.next()) {
+				if (trackerGr.result.toString().includes('cancelled')) {
+					result.cancelled = true;
+				}
+				
+				result.percent_complete = +trackerGr.percent_complete;
+				result.status = 'success';
+			} else {
+				result.message = gs.getMessage('dla_record_unauthorized_or_invalid_record');
+			}
+		} else {
+			result.message = gs.getMessage('dla_invalid_parameter');
+		}
+		
+		return JSON.stringify(result);
+	},
+	
+	analyseHistoricACL: function () {
+		const result = {
+			status: 'error',
+			message: ''
+		};
+		
+		const aclSysID = this.getParameter('historic_acl');
+		if (aclSysID) {
+			const histACLGr = new GlideRecordSecure('x_376096_dla_historic_acl');
+			histACLGr.addQuery('sys_id', aclSysID);
+			histACLGr.setLimit(1);
+			histACLGr.query();
+			if (histACLGr.next()) {
+				histACLGr.access_token = gs.generateGUID();
+				histACLGr.update();
+				
+				const rm = new sn_ws.RESTMessageV2();
+				rm.setHttpMethod('get');
+				rm.setEndpoint(gs.getProperty('glide.servlet.uri') + 
+					'api/x_376096_dla/public?access_token=' + histACLGr.access_token + 
+					'&historic_acl=' + histACLGr.sys_id
+				);
+				const response = rm.execute();
+				if (response.getStatusCode() == 200) {
+					const restResult = JSON.parse(response.getBody());
+					if (restResult.result) {
+						if (restResult.result.status == 'success') {
+							result.tracker_id = restResult.result.tracker_id;
+							result.status = 'success';
+						} else {
+							result.message = restResult.result.message;
+						}
+					} else {
+						result.message = 'REST Failed';
+					}
+				} else {
+					result.message = 'Failed to exec rest call';
+				}
+			} else {
+				result.message = gs.getMessage('dla_record_unauthorized_or_invalid_record');
+			}
+		} else {
+			result.message = gs.getMessage('dla_invalid_parameter');
+		}
+		
+		return JSON.stringify(result);
+	},
+	
+	cancelHistoricACLAnalysis: function () {
+		const result = {
+			status: 'error',
+			message: ''
+		};
+		
+		const trackerID = this.getParameter('tracker_id');
+		if (trackerID) {
+			new GlideExecutionTracker(trackerID).updateResult({ cancelled: true });
+			result.status = 'success';
+		} else {
+			result.message = gs.getMessage('dla_invalid_parameter');
+		}
+		
+		return JSON.stringify(result);
+	},
+	
+	filterPublicACLs: function () {
+		const result = {
+			status: 'error',
+			message: ''
+		};
+		
+		const dataLeakSysID = this.getParameter('data_leak');
+		if (dataLeakSysID) {
+			const dataLeakGr = new GlideRecordSecure('x_376096_dla_leak_result');
+			dataLeakGr.addQuery('sys_id', dataLeakSysID);
+			dataLeakGr.setLimit(1);
+			dataLeakGr.query();
+			if (dataLeakGr.next()) {
+				const baseFilter = 'name=' + dataLeakGr.table + '^operation=read';
+				const filter = this.getParameter('filter');
+				const aclGr = new GlideRecordSecure('sys_security_acl');
+				if (filter) {
+					aclGr.addEncodedQuery(
+						filter
+							.split('^NQ')
+							.map(x => baseFilter + '^' + x)
+							.join('^NQ')
+					);
+				} else {
+					aclGr.addEncodedQuery(baseFilter);
+				}
+
+				aclGr.query();
+
+				const publicACLs = [];
+				while (aclGr.next()) {
+					const aclSysID = aclGr.getUniqueValue();
+					if (this.dlaUtil.aclHasRole(aclSysID, 'public') ||
+						!this.dlaUtil.aclHasRoles(aclSysID)) {
+						publicACLs.push(aclSysID);
+					}
+				}
+
+				result.all_public = publicACLs.length && publicACLs.length == aclGr.getRowCount();
+				result.public_acls = publicACLs;
+				result.status = 'success';
+			} else {
+				result.message = gs.getMessage('dla_record_unauthorized_or_invalid_record');
+			}
+		} else {
+			result.message = gs.getMessage('dla_invalid_parameter');
+		}		
+		
+		return JSON.stringify(result);
+	},
+
+    type: 'DLAUtilClient'
+});]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2023-10-28 09:27:17</sys_created_on>
+        <sys_id>a8fee697974e3d103c2d3f56f053af31</sys_id>
+        <sys_mod_count>22</sys_mod_count>
+        <sys_name>DLAUtilClient</sys_name>
+        <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
+        <sys_update_name>sys_script_include_a8fee697974e3d103c2d3f56f053af31</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2023-10-28 22:52:02</sys_updated_on>
+    </sys_script_include>
+</record_update>

@@ -6,22 +6,28 @@
         <conditional>false</conditional>
         <frame/>
         <logged_on>false</logged_on>
-        <name>ACL Analysis Information</name>
-        <static_content><![CDATA[<p>The ACL Analysis will scan every Table ACL and test if a particular ACL allows public access.</p>
-<p>For every detected &#39;public&#39; ACL, a corresponding ACL-Analysis-Task will be generated.<br />Note: Running the ACL-Analysis multiple times will not generate duplicates!</p>
+        <name>ACL Instructions</name>
+        <static_content><![CDATA[<p> </p>
+<p>To ensure that this ACL is properly configured, make sure that:</p>
+<ul style="list-style-position: inside;"><li>A <strong>suitable</strong> <strong>role</strong> is <strong>added</strong> under &#34;Required roles&#34;</li><li>If <strong>public access</strong> is <strong>required</strong>, you should set <strong>add</strong> the <strong>public</strong> role <strong>explictily</strong></li><li>If <strong>adding</strong> a <strong>role</strong> is <strong>not</strong> <strong>possible</strong> and <strong>no Script</strong> is <strong>present</strong>, <strong>set</strong> the <strong>ACL</strong> to &#34;<strong>Advanced &#61; true</strong>&#34; and <strong>add</strong> the following <strong>script</strong>:<br />
+<pre style="width: 640px;">answer &#61; gs.getSession().isLoggedIn();
+if (!answer) {
+    answer &#61; gs.getProperty(&#39;glide.security.allow_unauth_roleless_acl&#39;, false);
+}</pre>
+</li></ul>
 <p>ServiceNow Resources:<br /><a href="https://docs.servicenow.com/bundle/vancouver-platform-security/page/administer/contextual-security/concept/acl-rule-types.html#acl-rule-types__fig_ey1_kn2_2r" target="_blank" rel="nofollow noopener noreferrer">ACL Evaluation ➚</a> (ServiceNow Docs)<br /><a href="https://support.servicenow.com/kb?id&#61;kb_article_view&amp;sysparm_article&#61;KB1555339" target="_blank" rel="nofollow noopener noreferrer">KB1555339 ➚</a> (ACL Maintenance)<br /><a href="https://support.servicenow.com/kb?id&#61;kb_article_view&amp;sysparm_article&#61;KB1555340" target="_blank" rel="nofollow noopener noreferrer">KB1555340 ➚</a> (Self Hosted ACL Maintenance)</p>]]></static_content>
         <sys_class_name>content_block_static</sys_class_name>
         <sys_created_by>admin</sys_created_by>
-        <sys_created_on>2023-10-20 22:23:00</sys_created_on>
-        <sys_id>db72980197ce71103c2d3f56f053afe0</sys_id>
-        <sys_mod_count>6</sys_mod_count>
-        <sys_name>ACL Analysis Information</sys_name>
+        <sys_created_on>2023-10-28 10:54:30</sys_created_on>
+        <sys_id>6e03cfdf978e3d103c2d3f56f053af9a</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name>ACL Instructions</sys_name>
         <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
         <sys_policy/>
         <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
-        <sys_update_name>content_block_static_db72980197ce71103c2d3f56f053afe0</sys_update_name>
+        <sys_update_name>content_block_static_6e03cfdf978e3d103c2d3f56f053af9a</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2023-10-28 11:15:34</sys_updated_on>
+        <sys_updated_on>2023-10-28 11:15:56</sys_updated_on>
     </content_block_static>
-    <sys_translated_text action="delete_multiple" query="documentkey=db72980197ce71103c2d3f56f053afe0"/>
+    <sys_translated_text action="delete_multiple" query="documentkey=6e03cfdf978e3d103c2d3f56f053af9a"/>
 </record_update>

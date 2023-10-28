@@ -28,10 +28,14 @@
         <list_style/>
         <messages/>
         <name>Show Data ➚</name>
-        <onclick>showData()</onclick>
+        <onclick>showTableData()</onclick>
         <order>100</order>
-        <script><![CDATA[function showData() {
-	g_navigation.open(g_form.getValue('table') + '_list.do', '_blank');
+        <script><![CDATA[function showTableData() {
+	
+	var d = new GlideModalForm('Table Row ACLs', g_form.getValue('table') + '_list');
+	d.addParm('sysparm_query', 'operation=read^name=' + g_form.getValue('table'));
+	d.render();
+	
 }]]></script>
         <show_insert>false</show_insert>
         <show_multiple_update>false</show_multiple_update>
@@ -43,7 +47,7 @@
         <sys_domain>global</sys_domain>
         <sys_domain_path>/</sys_domain_path>
         <sys_id>195909a197c635103c2d3f56f053af14</sys_id>
-        <sys_mod_count>0</sys_mod_count>
+        <sys_mod_count>2</sys_mod_count>
         <sys_name>Show Data ➚</sys_name>
         <sys_overrides/>
         <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
@@ -51,7 +55,7 @@
         <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
         <sys_update_name>sys_ui_action_195909a197c635103c2d3f56f053af14</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2023-10-22 15:36:41</sys_updated_on>
+        <sys_updated_on>2023-10-28 08:31:28</sys_updated_on>
         <table>x_376096_dla_leak_result</table>
         <ui11_compatible>false</ui11_compatible>
         <ui16_compatible>false</ui16_compatible>

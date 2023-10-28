@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="DELETE">
+        <access>public</access>
+        <active>true</active>
+        <api_name>x_376096_dla.DLAReportUtil</api_name>
+        <caller_access/>
+        <client_callable>true</client_callable>
+        <description/>
+        <name>DLAReportUtil</name>
+        <script><![CDATA[var DLAReportUtil = Class.create();
+DLAReportUtil.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
+    initialize: function () {
+		global.AbstractAjaxProcessor.prototype.initialize.apply(this, arguments);
+		
+		this.util = new x_376096_dla.DLAUtil();
+    },
+	
+	getPublicACLs: function () {
+		return this.util.getAffectedACLs().map(x => x.sys_id);
+	},
+
+    type: 'DLAReportUtil'
+});]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2023-10-20 19:57:14</sys_created_on>
+        <sys_id>0862bfb4970e71103c2d3f56f053afc6</sys_id>
+        <sys_mod_count>8</sys_mod_count>
+        <sys_name>DLAReportUtil</sys_name>
+        <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
+        <sys_update_name>sys_script_include_0862bfb4970e71103c2d3f56f053afc6</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2023-10-23 18:11:19</sys_updated_on>
+    </sys_script_include>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</application>
+        <file_path/>
+        <instance_id>65348116dbf0fb04b847ac44d496196d</instance_id>
+        <instance_name>dev81254</instance_name>
+        <name>sys_script_include_0862bfb4970e71103c2d3f56f053afc6</name>
+        <payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sys_script_include"&gt;&lt;sys_script_include action="INSERT_OR_UPDATE"&gt;&lt;access&gt;public&lt;/access&gt;&lt;active&gt;true&lt;/active&gt;&lt;api_name&gt;x_376096_dla.DLAReportUtil&lt;/api_name&gt;&lt;caller_access/&gt;&lt;client_callable&gt;true&lt;/client_callable&gt;&lt;description/&gt;&lt;name&gt;DLAReportUtil&lt;/name&gt;&lt;script&gt;&lt;![CDATA[var DLAReportUtil = Class.create();
+DLAReportUtil.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
+    initialize: function () {
+		global.AbstractAjaxProcessor.prototype.initialize.apply(this, arguments);
+		
+		this.util = new x_376096_dla.DLAUtil();
+    },
+	
+	getPublicACLs: function () {
+		return this.util.getAffectedACLs().map(x =&gt; x.sys_id);
+	},
+
+    type: 'DLAReportUtil'
+});]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script_include&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2023-10-20 19:57:14&lt;/sys_created_on&gt;&lt;sys_id&gt;0862bfb4970e71103c2d3f56f053afc6&lt;/sys_id&gt;&lt;sys_mod_count&gt;8&lt;/sys_mod_count&gt;&lt;sys_name&gt;DLAReportUtil&lt;/sys_name&gt;&lt;sys_package display_value="Data Leak Analyser" source="x_376096_dla"&gt;7ab9de70978671103c2d3f56f053af17&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Data Leak Analyser"&gt;7ab9de70978671103c2d3f56f053af17&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_include_0862bfb4970e71103c2d3f56f053afc6&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2023-10-23 18:11:19&lt;/sys_updated_on&gt;&lt;/sys_script_include&gt;&lt;/record_update&gt;</payload>
+        <payload_hash>-713558488</payload_hash>
+        <record_name>DLAReportUtil</record_name>
+        <reverted_from/>
+        <source>5d065c4597ce71103c2d3f56f053af51</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2023-10-23 18:11:19</sys_created_on>
+        <sys_id>2c177ab99702b5103c2d3f56f053afcd</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>18b5dbbefe30000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2023-10-23 18:11:19</sys_updated_on>
+        <type>Script Include</type>
+        <update_guid>e0177ab93d02b510fbe19351e6df68cd</update_guid>
+        <update_guid_history>e0177ab93d02b510fbe19351e6df68cd:-713558488,814423dd43cef11098ebcd1744b2c7f9:1492005171,31de7338d54e7110b0f1f00b8060f603:1974542028,e1537f38cd0e71101ad44c1a8b5f9106:-432089235,96037fb40e0e7110fc951e84453be3d2:-597314887,00d2f3380d0e71103c64d5bd11d0842a:854407696,59c2b3386e0e71105ef35a886eae8232:912330581,7ab2bff4320e71107521dc7a8a7df375:-1532377455,7e82bff4650e71109aadb28a8994db35:-742974644</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete/>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2023-10-28 16:22:44</sys_created_on>
+        <sys_db_object display_value="" name="sys_script_include">sys_script_include</sys_db_object>
+        <sys_id>a81b1c68efef492085421ee401e02910</sys_id>
+        <sys_metadata>0862bfb4970e71103c2d3f56f053afc6</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>DLAReportUtil</sys_name>
+        <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
+        <sys_scope_delete display_value="">018d62d8d4c944a6803460baf46bd164</sys_scope_delete>
+        <sys_update_name>sys_script_include_0862bfb4970e71103c2d3f56f053afc6</sys_update_name>
+        <sys_update_version display_value="sys_script_include_0862bfb4970e71103c2d3f56f053afc6">2c177ab99702b5103c2d3f56f053afcd</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2023-10-28 16:22:44</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

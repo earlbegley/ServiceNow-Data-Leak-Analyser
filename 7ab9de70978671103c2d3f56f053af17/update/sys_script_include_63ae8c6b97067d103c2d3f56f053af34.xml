@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <active>true</active>
+        <api_name>x_376096_dla.DLAACLAnalyser</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description/>
+        <name>DLAACLAnalyser</name>
+        <script><![CDATA[/* global Class, global, x_376096_dla, GlideRecord, GlideScopedEvaluator, GlideSysAttachment, GlideExecutionTracker */
+/* eslint no-undef: "error" */
+var DLAACLAnalyser = Class.create();
+DLAACLAnalyser.prototype = {
+    initialize: function() {
+		this.dlaUtil = new x_376096_dla.DLAUtil();
+		this.tracker = GlideExecutionTracker.getLastRunning();
+		this.tracker_id = this.tracker.getSysID();
+    },
+	
+	_trackerUpdateMessage: function (message) {
+		const globalTracker = new global.AJAXExecutionTracker();
+		const objs = {
+			sysparm_tracker_id: this.tracker_id,
+			sysparm_message: message
+		};
+		globalTracker.getParameter = function (n) { return objs[n]; };
+		globalTracker.updateMessage();
+	},
+	
+	_trackerIsCancelled: function () {
+		const trackerGr = new GlideRecord('sys_execution_tracker');
+		trackerGr.addQuery('sys_id', this.tracker_id);
+		trackerGr.addQuery('result', 'CONTAINS', '"cancelled":"true"');
+		trackerGr.setLimit(1);
+		trackerGr.query();
+		return trackerGr.hasNext();
+	},
+	
+	test: function () {		
+		for (let i = 0; i < 50; i++) {
+			this.dlaUtil._execScript('global', 'gs.sleep(500);');
+			this.tracker.incrementPercentComplete(2);
+			this._trackerUpdateMessage('hello: ' + i);
+			if (this._trackerIsCancelled()) {
+				this.tracker.fail('CANCELLED');
+				return;
+			}
+		}
+		
+		this.tracker.success();
+	},
+	
+	analyseHistoricACL: function (historicAclGr) {
+		const table = historicAclGr.leak_result.table;
+		const tableGr = new GlideRecord('sys_db_object');
+		tableGr.addQuery('name', table);
+		tableGr.setLimit(1);
+		tableGr.query();
+		if (tableGr.next()) {
+			this._trackerUpdateMessage('Cleaning previous analysis');
+			const gsa = new GlideSysAttachment();
+			const attGr = gsa.getAttachments('x_376096_dla_historic_acl', historicAclGr.getUniqueValue());
+			while (attGr.next()) {
+				if (attGr.file_name.toString().startsWith('leaked_')) {
+					gsa.deleteAttachment(attGr.sys_id);
+				}
+			}
+			
+			if (!historicAclGr.active) {
+				historicAclGr.leaked_records = 0;
+				historicAclGr.update();
+
+				this.tracker.incrementPercentComplete(100);
+				this.tracker.success();
+			} else {
+				const scope = tableGr.sys_scope.toString();
+				const anyGr = this.dlaUtil._execScript(scope, 
+					'(function () {' +
+						'var anyGr = new GlideRecord(tableName);' +
+						'anyGr.addQuery("sys_created_on", "<=", date);' +
+						'if (encodedQuery) {' +
+							'anyGr.addEncodedQuery(encodedQuery);' +
+						'}' +
+						'anyGr.query();' +
+						'return anyGr;' +
+					'})();', {
+					tableName: table,
+					encodedQuery: historicAclGr.condition,
+					date: historicAclGr.leak_result.attempt_date
+				});
+				
+				const recordCount = anyGr.getRowCount();
+				if (historicAclGr.advanced && historicAclGr.script) {
+					const scriptGr = new GlideRecord('sys_rte_eb_script_operation');
+					scriptGr.addQuery('sys_id', '9c8bdb7c978a71103c2d3f56f053afef');
+					scriptGr.setLimit(1);
+					scriptGr.query();
+					if (scriptGr.next()) {
+						scriptGr.sys_scope = historicAclGr.scope;
+						
+						// multiple limits for storing lots of Sys IDs
+						// -> we need to respect maximum string-size (32MB)
+						// -> leaked record's sys_ids are saved as attachment (for script evaluated records)
+						const batchSize = 2000;
+						const allBatches = [];
+						let currentBatch = [];
+						
+						const percentPerRecord = 100 / recordCount;
+						let percentageComplete = 0;
+						let leakedRecords = 0;
+
+						const script = historicAclGr.script.toString();
+						const isAnswerVariable = script.includes('answer');
+						while (anyGr.next()) {
+							const recordSysID = anyGr.getUniqueValue();
+							if (this._trackerIsCancelled()) {
+								this.tracker.fail('cancelled');
+								return;
+							}
+							
+							scriptGr.script = script;
+							this._trackerUpdateMessage('Testing ' + table + '/' + recordSysID);
+
+							const gse = new GlideScopedEvaluator();
+							gse.putVariable('answer', {});
+							gse.putVariable('current', anyGr);
+							const result = gse.evaluateScript(scriptGr, 'script');
+							if (isAnswerVariable) {
+								if (gse.getVariable('answer') == true) {
+									currentBatch.push(recordSysID);
+									leakedRecords++;
+								}
+							} else if (result) {
+								currentBatch.push(recordSysID);
+								leakedRecords++;
+							}
+									
+							if (currentBatch.length > batchSize) {
+								allBatches.push(currentBatch);
+								currentBatch = [];
+							}
+							
+							if (percentageComplete && Math.floor(percentageComplete + percentPerRecord) > Math.floor(percentageComplete)) {
+								this.tracker.incrementPercentComplete(1);
+							}
+							
+							percentageComplete += percentPerRecord;
+						}
+						
+						if (leakedRecords) {
+							this._trackerUpdateMessage('Saving Leaked Record SysIDs');
+							allBatches.push(currentBatch);
+
+							for (let i = 0; i < allBatches.length; i++) {
+								gsa.write(historicAclGr, 'leaked_' + i + '.txt', 'text/plain', allBatches[i].join(','));
+							}
+						}
+
+						historicAclGr.leaked_records = leakedRecords;
+						historicAclGr.update();
+						
+						if (percentageComplete < 100) {
+							this.tracker.incrementPercentComplete(1);
+						}
+
+						this.tracker.success();
+					} else {
+						this.tracker.fail('Cannot evaluate ACL');
+					}
+				} else {
+					historicAclGr.leaked_records = recordCount;
+					historicAclGr.update();
+					this.tracker.success();
+				}
+			}
+		} else {
+			this.tracker.fail('Invalid table');
+		}
+	},
+
+    type: 'DLAACLAnalyser'
+};]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2023-10-28 16:43:49</sys_created_on>
+        <sys_id>63ae8c6b97067d103c2d3f56f053af34</sys_id>
+        <sys_mod_count>41</sys_mod_count>
+        <sys_name>DLAACLAnalyser</sys_name>
+        <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
+        <sys_update_name>sys_script_include_63ae8c6b97067d103c2d3f56f053af34</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2023-10-28 23:16:29</sys_updated_on>
+    </sys_script_include>
+</record_update>

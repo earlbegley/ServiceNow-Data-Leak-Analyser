@@ -138,7 +138,24 @@ DLAUtil.prototype = {
 				'})();', { acls: acls, date: date });
 		}
 		
-		return Object.keys(acls).map(aclSysID => acls[aclSysID]);
+		// Convert the Global-Scoped-Array 'acls' to a Scoped-Array containing only Scoped-Data-Type-Members
+		return Object.keys(acls).map(aclSysID => {
+			const globalACL = acls[aclSysID];
+			const roles = [];
+			for (let i = 0; i < globalACL.roles.length; i++) {
+				roles.push(String(globalACL.roles[i]));
+			}
+			
+			return {
+				sys_id: String(aclSysID),
+				sys_scope: String(globalACL.sys_scope),
+				active: Boolean(globalACL.active),
+				condition: String(globalACL.condition),
+				advanced: Boolean(globalACL.advanced),
+				script: String(globalACL.script),
+				roles: roles
+			};
+		});
 	},
 	
 	exportRecordXML: function (recordTable, recordSysID) {
@@ -336,7 +353,7 @@ DLAUtil.prototype = {
 		};
 		
 		// need to query syslog_transaction via global-script (by default this table is global access only)
-		const transData = this._execScript('global',
+		const globalTransData = this._execScript('global',
 			'(function () {' +
 				'var transURLs = [];' +
 				'var transGr = new GlideRecord("syslog_transaction");' +
@@ -361,6 +378,19 @@ DLAUtil.prototype = {
 			'})();'
 		);
 		
+		// the array returned by the Script above is a global-scope array containing global-scope objects
+		// we convert this to scoped objects to allow e.g. string methods like 'includes'
+		const transData = [];
+		for (let i = 0; i < globalTransData.length; i++) {
+			const trans = globalTransData[i];
+			transData.push({
+				sys_id: String(trans.sys_id),
+				url: String(trans.url),
+				size: Number(trans.size),
+				date: String(trans.date)
+			});
+		}
+		
 		const regex = /^[/]?api\/now\/sp\/widget\/(.*?)\?.*(?:t|table)=(.*?)(?:&|$)/;
 		const widgetSimpleListSysID = '5b255672cb03020000f8d856634c9c28';
 		for (let i = 0; i < transData.length; i++) {
@@ -369,11 +399,7 @@ DLAUtil.prototype = {
 				const widget = match[1];
 				const table = match[2];
 				
-				const tableGr = new GlideRecord('sys_db_object');
-				tableGr.addQuery('name', table);
-				tableGr.setLimit(1);
-				tableGr.query();
-				if (!tableGr.hasNext()) {
+				if (!gs.tableExists(table)) {
 					analysisResult.prevented.push({
 						widget: getWidgetSysId(widget),
 						table: table,
@@ -390,7 +416,7 @@ DLAUtil.prototype = {
 				
 				// special case 'widget-simple-list': since March 2023, there is a 'public-access' which prevents leaks!
 				if (widget == 'widget-simple-list' || widget == widgetSimpleListSysID) {
-					if (acls.length && !acls.some(acl => acl.roles.length == 0 || acl.roles.indexOf('public') != -1)) {
+					if (acls.length && !acls.find(acl => acl.roles.length == 0 || acl.roles.includes('public'))) {
 						// if the table is not 'public', the simple list widget hasn't returned any results
 						// and as such the current table isn't subjected to a data leak (at least not through this widget)
 						analysisResult.prevented.push({
@@ -427,13 +453,13 @@ DLAUtil.prototype = {
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2023-10-20 16:17:18</sys_created_on>
         <sys_id>7ac95274978671103c2d3f56f053af95</sys_id>
-        <sys_mod_count>98</sys_mod_count>
+        <sys_mod_count>99</sys_mod_count>
         <sys_name>DLAUtil</sys_name>
         <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
         <sys_policy/>
         <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
         <sys_update_name>sys_script_include_7ac95274978671103c2d3f56f053af95</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2023-10-27 01:52:18</sys_updated_on>
+        <sys_updated_on>2023-10-28 12:07:13</sys_updated_on>
     </sys_script_include>
 </record_update>
