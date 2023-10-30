@@ -17,7 +17,7 @@
         <form_style/>
         <format_for_configurable_workspace>false</format_for_configurable_workspace>
         <hint/>
-        <isolate_script>false</isolate_script>
+        <isolate_script>true</isolate_script>
         <list_action>false</list_action>
         <list_banner_button>false</list_banner_button>
         <list_button>false</list_button>
@@ -27,20 +27,15 @@
         <list_save_with_form_button>false</list_save_with_form_button>
         <list_style/>
         <messages>dla_leaked_records</messages>
-        <name>Show Leaked Records</name>
-        <onclick>openAclLeaks()</onclick>
+        <name>Show Leaked Records ➚</name>
+        <onclick>openLeaks()</onclick>
         <order>100</order>
-        <script><![CDATA[function openAclLeaks() {
+        <script><![CDATA[function openLeaks() {
 	getMessage('dla_leaked_records', function (msg) {
 		var gm = new GlideModal();
 		gm.setTitle(msg);
 		
-		var iFrameURL = 'x_376096_dla_leaks.do?sysparm_is_dialog_form=true&historic_acl=';
-		if (typeof rowSysId != 'undefined') {
-			iFrameURL += rowSysId;
-		} else {
-			iFrameURL += g_form.getUniqueValue();
-		}
+		var iFrameURL = 'x_376096_dla_leaks.do?sysparm_is_dialog_form=true&leak_result=' + g_form.getUniqueValue();
 
 		gm.renderIframe(iFrameURL, function () {
 			gm.maximizeHeight();
@@ -53,20 +48,20 @@
         <show_update>true</show_update>
         <sys_class_name>sys_ui_action</sys_class_name>
         <sys_created_by>admin</sys_created_by>
-        <sys_created_on>2023-10-27 14:27:59</sys_created_on>
+        <sys_created_on>2023-10-29 23:12:58</sys_created_on>
         <sys_domain>global</sys_domain>
         <sys_domain_path>/</sys_domain_path>
-        <sys_id>70d62ecb978af9103c2d3f56f053af5a</sys_id>
-        <sys_mod_count>14</sys_mod_count>
-        <sys_name>Show Leaked Records</sys_name>
+        <sys_id>69a5b2bb97c2fd103c2d3f56f053af74</sys_id>
+        <sys_mod_count>3</sys_mod_count>
+        <sys_name>Show Leaked Records ➚</sys_name>
         <sys_overrides/>
         <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
         <sys_policy/>
         <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
-        <sys_update_name>sys_ui_action_70d62ecb978af9103c2d3f56f053af5a</sys_update_name>
+        <sys_update_name>sys_ui_action_69a5b2bb97c2fd103c2d3f56f053af74</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2023-10-30 00:01:54</sys_updated_on>
-        <table>x_376096_dla_historic_acl</table>
+        <sys_updated_on>2023-10-30 00:12:24</sys_updated_on>
+        <table>x_376096_dla_leak_result</table>
         <ui11_compatible>false</ui11_compatible>
         <ui16_compatible>false</ui16_compatible>
     </sys_ui_action>

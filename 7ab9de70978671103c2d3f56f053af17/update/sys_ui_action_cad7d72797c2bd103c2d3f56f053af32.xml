@@ -7,17 +7,17 @@
 
 }]]></client_script_v2>
         <comments/>
-        <condition>current.canWrite()</condition>
+        <condition>current.canWrite() &amp;&amp; !current.tracker_id.nil()</condition>
         <form_action>true</form_action>
-        <form_button>false</form_button>
+        <form_button>true</form_button>
         <form_button_v2>false</form_button_v2>
         <form_context_menu>false</form_context_menu>
-        <form_link>true</form_link>
+        <form_link>false</form_link>
         <form_menu_button_v2>false</form_menu_button_v2>
-        <form_style/>
+        <form_style>destructive</form_style>
         <format_for_configurable_workspace>false</format_for_configurable_workspace>
         <hint/>
-        <isolate_script>false</isolate_script>
+        <isolate_script>true</isolate_script>
         <list_action>false</list_action>
         <list_banner_button>false</list_banner_button>
         <list_button>false</list_button>
@@ -26,25 +26,32 @@
         <list_link>false</list_link>
         <list_save_with_form_button>false</list_save_with_form_button>
         <list_style/>
-        <messages>dla_leaked_records</messages>
-        <name>Show Leaked Records</name>
-        <onclick>openAclLeaks()</onclick>
+        <messages/>
+        <name>Cancel Analysis</name>
+        <onclick>cancelHistoricACLAnalysis()</onclick>
         <order>100</order>
-        <script><![CDATA[function openAclLeaks() {
-	getMessage('dla_leaked_records', function (msg) {
-		var gm = new GlideModal();
-		gm.setTitle(msg);
-		
-		var iFrameURL = 'x_376096_dla_leaks.do?sysparm_is_dialog_form=true&historic_acl=';
-		if (typeof rowSysId != 'undefined') {
-			iFrameURL += rowSysId;
-		} else {
-			iFrameURL += g_form.getUniqueValue();
+        <script><![CDATA[/* global GlideAjax, rowSysId, g_form, GlideModal */
+/* eslint no-undef: "error" */
+function cancelHistoricACLAnalysis() {
+	var ga = new GlideAjax('x_376096_dla.DLAUtilClient');
+	ga.addParam('sysparm_name', 'cancelHistoricACLAnalysis');
+	
+	if (typeof rowSysId != 'undefined') {
+		ga.addParam('historic_acl', rowSysId);
+	} else {
+		ga.addParam('historic_acl', g_form.getUniqueValue());
+	}
+	
+	ga.getXMLAnswer(function (result) {
+		result = JSON.parse(result);
+		if (result.status == 'success') {
+			var dd = new GlideModal('hierarchical_progress_viewer', false, '40em', '10em');
+			dd.setTitle('Status');
+			dd.setPreference('sysparm_renderer_execution_id', result.tracker_id);
+			dd.render();
+		} else if (result.message) {
+			g_form.addErrorMessage(result.message);
 		}
-
-		gm.renderIframe(iFrameURL, function () {
-			gm.maximizeHeight();
-		});
 	});
 }]]></script>
         <show_insert>false</show_insert>
@@ -53,19 +60,19 @@
         <show_update>true</show_update>
         <sys_class_name>sys_ui_action</sys_class_name>
         <sys_created_by>admin</sys_created_by>
-        <sys_created_on>2023-10-27 14:27:59</sys_created_on>
+        <sys_created_on>2023-10-29 07:10:09</sys_created_on>
         <sys_domain>global</sys_domain>
         <sys_domain_path>/</sys_domain_path>
-        <sys_id>70d62ecb978af9103c2d3f56f053af5a</sys_id>
-        <sys_mod_count>14</sys_mod_count>
-        <sys_name>Show Leaked Records</sys_name>
+        <sys_id>cad7d72797c2bd103c2d3f56f053af32</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Cancel Analysis</sys_name>
         <sys_overrides/>
         <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
         <sys_policy/>
         <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
-        <sys_update_name>sys_ui_action_70d62ecb978af9103c2d3f56f053af5a</sys_update_name>
+        <sys_update_name>sys_ui_action_cad7d72797c2bd103c2d3f56f053af32</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2023-10-30 00:01:54</sys_updated_on>
+        <sys_updated_on>2023-10-29 07:10:09</sys_updated_on>
         <table>x_376096_dla_historic_acl</table>
         <ui11_compatible>false</ui11_compatible>
         <ui16_compatible>false</ui16_compatible>

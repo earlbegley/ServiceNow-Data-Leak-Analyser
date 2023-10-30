@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_scope_privilege">
+    <sys_scope_privilege action="DELETE">
+        <operation>execute</operation>
+        <source_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</source_scope>
+        <status>allowed</status>
+        <sys_class_name>sys_scope_privilege</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2023-10-20 18:27:20</sys_created_on>
+        <sys_id>71fd933097ca71103c2d3f56f053afeb</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>SNCACLUtil</sys_name>
+        <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
+        <sys_update_name>sys_scope_privilege_71fd933097ca71103c2d3f56f053afeb</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2023-10-20 18:27:20</sys_updated_on>
+        <target_name>SNCACLUtil</target_name>
+        <target_scope display_value="Global">global</target_scope>
+        <target_type>sys_script_include</target_type>
+    </sys_scope_privilege>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</application>
+        <file_path/>
+        <instance_id>65348116dbf0fb04b847ac44d496196d</instance_id>
+        <instance_name>dev81254</instance_name>
+        <name>sys_scope_privilege_71fd933097ca71103c2d3f56f053afeb</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_scope_privilege"><sys_scope_privilege action="INSERT_OR_UPDATE"><operation>execute</operation><source_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</source_scope><status>allowed</status><sys_class_name>sys_scope_privilege</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2023-10-20 18:27:20</sys_created_on><sys_id>71fd933097ca71103c2d3f56f053afeb</sys_id><sys_mod_count>0</sys_mod_count><sys_name>SNCACLUtil</sys_name><sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package><sys_policy/><sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope><sys_update_name>sys_scope_privilege_71fd933097ca71103c2d3f56f053afeb</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2023-10-20 18:27:20</sys_updated_on><target_name>SNCACLUtil</target_name><target_scope display_value="Global">global</target_scope><target_type>sys_script_include</target_type></sys_scope_privilege></record_update>]]></payload>
+        <payload_hash>2036750690</payload_hash>
+        <record_name>SNCACLUtil</record_name>
+        <reverted_from/>
+        <source>3ab9de34978671103c2d3f56f053affb</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2023-10-20 18:27:20</sys_created_on>
+        <sys_id>f5fd933097ca71103c2d3f56f053afed</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>18b4e5785490000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2023-10-20 18:27:20</sys_updated_on>
+        <type>Cross scope privilege</type>
+        <update_guid>79fd93300dca7110163b26fb64230bec</update_guid>
+        <update_guid_history>79fd93300dca7110163b26fb64230bec:2036750690</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete/>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2023-10-29 15:08:13</sys_created_on>
+        <sys_db_object display_value="" name="sys_scope_privilege">sys_scope_privilege</sys_db_object>
+        <sys_id>2e1c5392e2074e8c92b91f0efe80b724</sys_id>
+        <sys_metadata>71fd933097ca71103c2d3f56f053afeb</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>SNCACLUtil</sys_name>
+        <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
+        <sys_scope_delete display_value="">018d62d8d4c944a6803460baf46bd164</sys_scope_delete>
+        <sys_update_name>sys_scope_privilege_71fd933097ca71103c2d3f56f053afeb</sys_update_name>
+        <sys_update_version display_value="sys_scope_privilege_71fd933097ca71103c2d3f56f053afeb">f5fd933097ca71103c2d3f56f053afed</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2023-10-29 15:08:13</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

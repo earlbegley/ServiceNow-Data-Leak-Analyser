@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="content_block_static">
+    <content_block_static action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <category>general</category>
+        <condition/>
+        <conditional>false</conditional>
+        <frame/>
+        <logged_on>false</logged_on>
+        <name>Widget Instruction</name>
+        <static_content><![CDATA[<p>Please take a good look at the widget(s) and answer the following questions:</p>
+<ul style="list-style-position: inside;"><li>Is there a good reason for the Widget to be public?</li><li>Does the Widget accept dynamic input, e.g. via $sp.getParameter?</li><li>Does the Widget expose data to the caller?</li><li>Does the Widget loop over a records of a table and expose data to the caller?</li><li>Does the Widget access a table dynamically (e.g. input-dependent)?</li></ul>
+<p>If you answer several of those questions with &#39;yes&#39; or &#39;maybe&#39;, then you have a good chance that the widget might leak data to an attacker and you should set the Widget to &#39;Public &#61; false&#39;.</p>
+<p><strong>Note:</strong> The Analysis is currently restricted to Public Widgets, that do a <strong>dynamic</strong> GlideRecord(Secure) lookup. Depending on the complexity of a Widget, more might be affected.</p>
+<p>ServiceNow Resources:<br /><a href="https://support.servicenow.com/kb?id&#61;kb_article_view&amp;sysparm_article&#61;KB1553688" target="_blank" rel="nofollow noopener noreferrer">KB1553688 ➚</a> (General Information | Potential Public List Widget Misconfiguration)</p>]]></static_content>
+        <sys_class_name>content_block_static</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2023-10-29 15:11:30</sys_created_on>
+        <sys_id>3c77cdfb97cabd103c2d3f56f053af63</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Widget Instruction</sys_name>
+        <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
+        <sys_update_name>content_block_static_3c77cdfb97cabd103c2d3f56f053af63</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2023-10-29 15:11:30</sys_updated_on>
+    </content_block_static>
+    <sys_translated_text action="delete_multiple" query="documentkey=3c77cdfb97cabd103c2d3f56f053af63"/>
+</record_update>

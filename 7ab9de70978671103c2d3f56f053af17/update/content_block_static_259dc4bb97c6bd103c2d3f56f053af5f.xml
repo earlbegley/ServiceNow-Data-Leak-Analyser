@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="content_block_static">
+    <content_block_static action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <category>general</category>
+        <condition/>
+        <conditional>false</conditional>
+        <frame/>
+        <logged_on>false</logged_on>
+        <name>Leak Instructions</name>
+        <static_content><![CDATA[<p>To <strong>identify</strong> <strong>leaked</strong> <strong>records</strong>, please see the &#34;<strong>Historic ACLs</strong>&#34; list below.<br />Each <strong>Historic ACL</strong> is a <strong>version</strong> of the <strong>ACLs</strong> that were <strong>used</strong> in at<strong> </strong>the<strong> time </strong>of<strong> </strong>the<strong> transaction</strong>.</p>
+<p>To run the leak analysis, simply use the &#34;<strong>Analyse Access</strong>&#34; UI Action. This will run every record - if it existed at the time of the transaction - against the Historic ACL configuration. Every match is a leaked record and the Sys ID of the record will be stored.</p>
+<p><strong>Important:</strong> Any <strong>records</strong> <strong>deleted</strong> <span style="text-decoration: underline;"><strong>after</strong></span> the <strong>&#39;Attempt date&#39;</strong> are <span style="text-decoration: underline;"><strong>NOT</strong></span> <strong>covered</strong> by this <strong>analysis</strong>.</p>]]></static_content>
+        <sys_class_name>content_block_static</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2023-10-29 10:58:41</sys_created_on>
+        <sys_id>259dc4bb97c6bd103c2d3f56f053af5f</sys_id>
+        <sys_mod_count>6</sys_mod_count>
+        <sys_name>Leak Instructions</sys_name>
+        <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
+        <sys_update_name>content_block_static_259dc4bb97c6bd103c2d3f56f053af5f</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2023-10-29 21:43:29</sys_updated_on>
+    </content_block_static>
+    <sys_translated_text action="delete_multiple" query="documentkey=259dc4bb97c6bd103c2d3f56f053af5f"/>
+</record_update>

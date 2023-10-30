@@ -7,7 +7,7 @@
 
 }]]></client_script_v2>
         <comments>This is the UI Action for the embedded Historic ACL list</comments>
-        <condition>current.canWrite()</condition>
+        <condition>current.canWrite() &amp;&amp; current.tracker_id.nil()</condition>
         <form_action>true</form_action>
         <form_button>true</form_button>
         <form_button_v2>false</form_button_v2>
@@ -30,7 +30,7 @@
         <name>Analyze Access</name>
         <onclick>analyseHistoricACL()</onclick>
         <order>100</order>
-        <script><![CDATA[/* global current, action, x_376096_dla, gs, GlideAjax, rowSysId, g_form, GlideModal, g_list */
+        <script><![CDATA[/* global GlideAjax, rowSysId, g_form, GlideModal, g_list, setTimeout */
 /* eslint no-undef: "error" */
 function analyseHistoricACL() {
 	var ga = new GlideAjax('x_376096_dla.DLAUtilClient');
@@ -38,7 +38,6 @@ function analyseHistoricACL() {
 	
 	if (typeof rowSysId != 'undefined') {
 		ga.addParam('historic_acl', rowSysId);
-		
 	} else {
 		ga.addParam('historic_acl', g_form.getUniqueValue());
 	}
@@ -49,9 +48,24 @@ function analyseHistoricACL() {
 			var dd = new GlideModal('hierarchical_progress_viewer', false, '40em', '10em');
 			dd.setTitle('Status');
 			dd.setPreference('sysparm_renderer_execution_id', result.tracker_id);
-			dd.on("beforeclose", function () {
+			
+			var completed = false;
+			dd.on('executionComplete', function() {
+				completed = true;
 				if (typeof g_list != 'undefined') {
 					g_list.refresh();
+				}
+			});
+			dd.on('beforeclose', function () {
+				// if the window is closed before the analysis completes,
+				// the 'Cancel Analysis' button needs to be shown
+				if (completed) {
+					if (g_form.getTableName() == 'x_376096_dla_historic_acl') {
+						// reload form to show latest attachments and buttons
+						setTimeout(function () {
+							this.reloadWindow(this);
+						});
+					}
 				}
 			});
 			dd.render();
@@ -70,7 +84,7 @@ function analyseHistoricACL() {
         <sys_domain>global</sys_domain>
         <sys_domain_path>/</sys_domain_path>
         <sys_id>c402d10f9706f9103c2d3f56f053af4f</sys_id>
-        <sys_mod_count>13</sys_mod_count>
+        <sys_mod_count>16</sys_mod_count>
         <sys_name>Analyze Access</sys_name>
         <sys_overrides/>
         <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
@@ -78,7 +92,7 @@ function analyseHistoricACL() {
         <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
         <sys_update_name>sys_ui_action_c402d10f9706f9103c2d3f56f053af4f</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2023-10-28 23:23:16</sys_updated_on>
+        <sys_updated_on>2023-10-29 09:16:02</sys_updated_on>
         <table>x_376096_dla_historic_acl</table>
         <ui11_compatible>false</ui11_compatible>
         <ui16_compatible>false</ui16_compatible>

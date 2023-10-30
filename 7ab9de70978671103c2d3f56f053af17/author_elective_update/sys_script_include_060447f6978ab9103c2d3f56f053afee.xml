@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="DELETE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_376096_dla.DLAUIActionUtil</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description>This Script Include is used as a utility to determine UI Action visibilities</description>
+        <name>DLAUIActionUtil</name>
+        <script><![CDATA[/* global Class, x_376096_dla, gs, sn_ws */
+/* eslint no-undef: "error" */
+var DLAUIActionUtil = Class.create();
+DLAUIActionUtil.prototype = {
+    initialize: function() {
+		this.dlaUtil = new x_376096_dla.DLAUtil();
+    },
+	
+	showPublicACLsUIActionVisible: function (current, parent, action, RP) {
+		if (gs.hasRole('admin')) {
+			if (parent) {
+				return parent.getTableName() == 'x_376096_dla_leak_result';
+			}
+		}
+		
+		return false;
+	},
+
+    type: 'DLAUIActionUtil'
+};]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2023-10-26 21:46:37</sys_created_on>
+        <sys_id>060447f6978ab9103c2d3f56f053afee</sys_id>
+        <sys_mod_count>26</sys_mod_count>
+        <sys_name>DLAUIActionUtil</sys_name>
+        <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
+        <sys_update_name>sys_script_include_060447f6978ab9103c2d3f56f053afee</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2023-10-29 09:08:37</sys_updated_on>
+    </sys_script_include>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</application>
+        <file_path/>
+        <instance_id>65348116dbf0fb04b847ac44d496196d</instance_id>
+        <instance_name>dev81254</instance_name>
+        <name>sys_script_include_060447f6978ab9103c2d3f56f053afee</name>
+        <payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sys_script_include"&gt;&lt;sys_script_include action="INSERT_OR_UPDATE"&gt;&lt;access&gt;package_private&lt;/access&gt;&lt;active&gt;true&lt;/active&gt;&lt;api_name&gt;x_376096_dla.DLAUIActionUtil&lt;/api_name&gt;&lt;caller_access/&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;description&gt;This Script Include is used as a utility to determine UI Action visibilities&lt;/description&gt;&lt;name&gt;DLAUIActionUtil&lt;/name&gt;&lt;script&gt;&lt;![CDATA[/* global Class, x_376096_dla, gs, sn_ws */
+/* eslint no-undef: "error" */
+var DLAUIActionUtil = Class.create();
+DLAUIActionUtil.prototype = {
+    initialize: function() {
+		this.dlaUtil = new x_376096_dla.DLAUtil();
+    },
+	
+	showPublicACLsUIActionVisible: function (current, parent, action, RP) {
+		if (gs.hasRole('admin')) {
+			if (parent) {
+				return parent.getTableName() == 'x_376096_dla_leak_result';
+			}
+		}
+		
+		return false;
+	},
+
+    type: 'DLAUIActionUtil'
+};]]&gt;&lt;/script&gt;&lt;sys_class_name&gt;sys_script_include&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2023-10-26 21:46:37&lt;/sys_created_on&gt;&lt;sys_id&gt;060447f6978ab9103c2d3f56f053afee&lt;/sys_id&gt;&lt;sys_mod_count&gt;26&lt;/sys_mod_count&gt;&lt;sys_name&gt;DLAUIActionUtil&lt;/sys_name&gt;&lt;sys_package display_value="Data Leak Analyser" source="x_376096_dla"&gt;7ab9de70978671103c2d3f56f053af17&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Data Leak Analyser"&gt;7ab9de70978671103c2d3f56f053af17&lt;/sys_scope&gt;&lt;sys_update_name&gt;sys_script_include_060447f6978ab9103c2d3f56f053afee&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2023-10-29 09:08:37&lt;/sys_updated_on&gt;&lt;/sys_script_include&gt;&lt;/record_update&gt;</payload>
+        <payload_hash>-556789643</payload_hash>
+        <record_name>DLAUIActionUtil</record_name>
+        <reverted_from/>
+        <source>5d065c4597ce71103c2d3f56f053af51</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2023-10-29 09:08:37</sys_created_on>
+        <sys_id>8d647beb9746bd103c2d3f56f053afff</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>18b7ab13b730000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2023-10-29 09:08:37</sys_updated_on>
+        <type>Script Include</type>
+        <update_guid>85647bebe546bd10d94f68980b6b7cff</update_guid>
+        <update_guid_history>85647bebe546bd10d94f68980b6b7cff:-556789643,b4ea58e701467d10ad1f72085ed8ae41:66202744,67da182b95467d108609a67b4b7d7b79:-614439063,11dad8e7ea467d1080239f55372b9adb:66202744,441e086bf4067d10f8f91881e87e9da3:-614439063,fbddcc2b51067d10264c55d3d69e044f:372106609,705dc42b01067d1036ac219f5b64a123:226149203,f268bad3968e3d10b1772247bcc1f201:-144501352,90387e93c78e3d1091798ac013667f55:1877854238,e518fa93228e3d105bf021dea3846de2:-686233525,1227f253bb8e3d1047508b07f745723e:-1692078053,8f363a132a8e3d10091a288f6dc706b2:1878609289,10e57613a58e3d106ec457af5c70a848:-515458368,6111be9b424e3d102bbc37ee966ca382:-889502757,9b8c6657364e3d105bfe9118d82fbbe9:484505147,f781ea1b0c0e3d10d712fc95b09785f9:-918423414,da51e61bf90e3d1014a2aa3833cbbe7e:478131646,91d0aed75c0e3d10d9f687e64fb67f07:416815187,4a30ee97200e3d1044db9d6c5422fec1:-1128411078,5a9faf7a2b4eb910b6a8a5b47f19a120:746253023,773e0bf21bcab910071f18ea0decf86b:1749521088,8b1e4fb297cab9106a481cdc263d7261:2025635656,045d4fb229cab910ba5814b8e9de4251:879891643,c9bc4b72cfcab9100a33e9134456d8a4:237816476,5a9b0b7277cab910d053cc336632e45e:-1734555777,676b477206cab910342af242fbed4903:1007424449,231547f6fa8ab9108778187d5629c20d:-790644022</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete/>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2023-10-29 09:10:16</sys_created_on>
+        <sys_db_object display_value="" name="sys_script_include">sys_script_include</sys_db_object>
+        <sys_id>01aac978fb6342c4968ad7e5a85da910</sys_id>
+        <sys_metadata>060447f6978ab9103c2d3f56f053afee</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>DLAUIActionUtil</sys_name>
+        <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
+        <sys_scope_delete display_value="">018d62d8d4c944a6803460baf46bd164</sys_scope_delete>
+        <sys_update_name>sys_script_include_060447f6978ab9103c2d3f56f053afee</sys_update_name>
+        <sys_update_version display_value="sys_script_include_060447f6978ab9103c2d3f56f053afee">8d647beb9746bd103c2d3f56f053afff</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2023-10-29 09:10:16</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

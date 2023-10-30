@@ -27,12 +27,13 @@
 			historicAclGr.setLimit(1);
 			historicAclGr.query();
 			if (historicAclGr.next()) {
+				// the access token is "one-use" only and should be cleared as early as possible
 				historicAclGr.access_token = '';
 				historicAclGr.update();
 				
 				const worker = new GlideScriptedHierarchicalWorker();
-				worker.setProgressName('Public ACL Analysis: ' + historicACL);
-				worker.setScriptIncludeName('x_376096_dla.DLAACLAnalyser');
+				worker.setProgressName('Historic ACL Analysis');
+				worker.setScriptIncludeName('x_376096_dla.DLAHistoricACLAnalyser');
 				worker.setScriptIncludeMethod('analyseHistoricACL');
 				worker.putMethodArg('historicAclGr', historicAclGr);
 				worker.setBackground(true);
@@ -43,119 +44,11 @@
 			} else {
 				result.message = gs.getMessage('dla_record_unauthorized_or_invalid_record');
 			}
-			/*
-			
-			
-				
-				if (!historicAclGr.active) {
-					historicAclGr.leaked_records = 0;
-					historicAclGr.update();
-					result.message = 'success';
-				} else {
-					const table = historicAclGr.leak_result.table;
-					const tableGr = new GlideRecord('sys_db_object');
-					tableGr.addQuery('name', table);
-					tableGr.setLimit(1);
-					tableGr.query();
-					if (tableGr.next()) {
-						const scope = tableGr.sys_scope.toString();
-						const dlaUtil = new x_376096_dla.DLAUtil();
-						const anyGr = dlaUtil._execScript(scope, 
-							'(function () {' +
-								'var anyGr = new GlideRecord(tableName);' +
-								'anyGr.addQuery("sys_created_on", "<=", date);' +
-								'if (encodedQuery) {' +
-									'anyGr.addEncodedQuery(encodedQuery);' +
-								'}' +
-								'anyGr.query();' +
-								'return anyGr;' +
-							'})();', {
-							tableName: table,
-							encodedQuery: historicAclGr.condition,
-							date: historicAclGr.leak_result.attempt_date
-						});
-						
-						if (historicAclGr.advanced) {
-							let count = 0;
-							// multiple limits for storing lots of Sys IDs
-							// 1.) we need to respect maximum string-size (32MB)
-							// -> leaked record's sys_ids are saved as attachment (for script evaluated records)
-							// 2.) we need to somehow display the records
-							// -> this is done via tiny urls (sys_tiny_url), but those are limited to 64kB (around 2k SysIDs per tiny url)
-							const batchSize = 2000;
-							const allBatches = [];
-							let currentBatch = [];
-							const scriptGr = new GlideRecord('sys_rte_eb_script_operation');
-							scriptGr.addQuery('sys_id', '9c8bdb7c978a71103c2d3f56f053afef');
-							scriptGr.setLimit(1);
-							scriptGr.query();
-							if (scriptGr.next()) {
-								scriptGr.sys_scope = historicAclGr.scope;
-								
-								const script = historicAclGr.script.toString();
-								const isAnswerVariable = script.includes('answer');
-								while (anyGr.next()) {									
-									scriptGr.script = script;
-
-									const gse = new GlideScopedEvaluator();
-									gse.putVariable('answer', {});
-									gse.putVariable('current', anyGr);
-									const result = gse.evaluateScript(scriptGr, 'script');
-									if (isAnswerVariable) {
-										if (gse.getVariable('answer') == true) {
-											currentBatch.push(anyGr.getUniqueValue());
-											count++;
-										}
-									} else if (result) {
-										currentBatch.push(anyGr.getUniqueValue());
-										count++;
-									}
-									
-									if (currentBatch.length > batchSize) {
-										allBatches.push(currentBatch);
-										currentBatch = [];
-									}
-								}
-								
-								if (count) {
-									allBatches.push(currentBatch);
-									
-									const gsa = new GlideSysAttachment();
-									const attGr = gsa.getAttachments('x_376096_dla_historic_acl', historicAclGr.sys_id);
-									while (attGr.next) {
-										if (attGr.file_name.toString().startsWith('leaked_')) {
-											gsa.deleteAttachment(attGr.sys_id);
-										}
-									}
-									
-									for (let i = 0; i < allBatches.length; i++) {
-										gsa.write(historicAclGr, 'leaked_' + i + '.txt', 'text/plain', allBatches[i].join(','));
-									}
-								}
-								
-								historicAclGr.leaked_records = count;
-								historicAclGr.update();
-								result.message = 'success';
-							} else {
-								result.message = 'Cannot evaluate ACL';
-							}
-						} else {
-							historicAclGr.leaked_records = anyGr.getRowCount();
-							historicAclGr.update();
-							result.message = 'success';
-						}
-					} else {
-						result.message = 'Invalid table';
-					}
-				}
-			} else {
-				result.message = 'No Record found';
-			}*/
 		} else {
-			result.message = 'This API cannot be accessed without an Access Token!';
+			result.message = gs.getMessage('dla_access_token_required');
 		}
 	} else {
-		result.message = 'This API only be accessed as "guest"';
+		result.message = gs.getMessage('dla_guest_only_access');
 	}
 	
 	response.setBody(result);
@@ -175,14 +68,14 @@
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2023-10-25 05:12:35</sys_created_on>
         <sys_id>39879e1a97c239103c2d3f56f053af87</sys_id>
-        <sys_mod_count>38</sys_mod_count>
+        <sys_mod_count>40</sys_mod_count>
         <sys_name>Extract</sys_name>
         <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
         <sys_policy/>
         <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
         <sys_update_name>sys_ws_operation_39879e1a97c239103c2d3f56f053af87</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2023-10-28 22:44:48</sys_updated_on>
+        <sys_updated_on>2023-10-29 06:55:54</sys_updated_on>
         <web_service_definition display_value="Extract Public">1c771e1a97c239103c2d3f56f053af5e</web_service_definition>
         <web_service_version/>
     </sys_ws_operation>

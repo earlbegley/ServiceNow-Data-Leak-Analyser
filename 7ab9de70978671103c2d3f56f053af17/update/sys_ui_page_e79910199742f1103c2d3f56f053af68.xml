@@ -7,52 +7,54 @@
         <endpoint>x_376096_dla_analyse_widgets.do</endpoint>
         <html><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
 <j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+	<g:inline template="x_376096_dla_dxc_branding.xml"/>
 	<g2:evaluate var="jvar_refresh" expression="RP.getParameterValue('refresh')" />
 	<j2:if test="$[!empty(jvar_refresh)]">
 		<script>
 			(function refreshReportTable() {
-				document.querySelectorAll(".header-icon.icon-refresh").forEach(function (element) {
-					element.click();
-				});
-			
-				return;
-			
-				// as the page is reloaded after a click on "Analyse ACLs", the report table will
-				// be always "up-to-date"
-				var parentWindow = window.parent;
-				if (parentWindow $[AND] parentWindow.GlideLists2) {
-					for (var listID in parentWindow.GlideLists2) {
-						var list = parentWindow.GlideLists2[listID];
-						// On Dashboard-Tab-Switch, the a new GlideList Object is created, but the
-						// old Objects are not cleaned up.
-						// Refreshing the dead lists will result in a crash!
-						var domElementExists = !!parentWindow.document.getElementById(listID);
-						if (list.tableName == 'x_376096_dla_widget_result' $[AND] domElementExists) {
-							list.refresh();
-						}
-					}
+				if (window.parent) {
+					window.parent.document
+						.querySelectorAll(".header-icon.icon-refresh").forEach(function (element) {
+						element.click();
+					});
 				}
 			})();
 		</script>
 	</j2:if>
+	<g:ui_form>
+		<table>
+			<tr>
+				<td><input type="checkbox" disabled="disabled" checked="checked" /></td>
+				<td>Scan dynamic GlideRecord(Secure)</td>
+			</tr>
+			<tr>
+				<td><input type="checkbox" disabled="disabled" checked="checked" /></td>
+				<td>Prioritise Loops</td>
+			</tr>
+			<tr>
+				<td><input type="checkbox" disabled="disabled" /></td>
+				<td>Reopen closed tasks</td>
+			</tr>
+			<tr>
+				<td><input type="checkbox" disabled="disabled" checked="checked" /></td>
+				<td>Add changed analysis results to 'Work notes'</td>
+			</tr>
+		</table>
+		<button class="action button" type="submit" onclick="this.disabled=true; this.form.submit();">
+			${gs.getMessage('dla_run_analysis')}
+		</button>
+	</g:ui_form>
 	<g2:evaluate>
 		const skipAnalysis = RP.getParameterValue('skip_analysis') == 'true';
-		let runWidgetAnalysis = false;
-		let buttonLabel = 'Analyse Widgets';
 		const widgetResultGr = new GlideRecord('x_376096_dla_widget_result');
 		widgetResultGr.setLimit(1);
 		widgetResultGr.query();
-		if (widgetResultGr.hasNext()) {
-			buttonLabel = 'Re-Analyse Widgets';
-		} else if (!skipAnalysis) {
+		
+		let runWidgetAnalysis = false;
+		if (!widgetResultGr.hasNext() $[AND] !skipAnalysis) {
 			runWidgetAnalysis = true;
 		}
 	</g2:evaluate>
-	<g:ui_form>
-		<button class="action button" type="submit" onclick="this.disabled=true; this.form.submit();">
-			$[buttonLabel]
-		</button>
-	</g:ui_form>
 	<j2:if test="$[runWidgetAnalysis]">
 		<script>
 			(function () {
@@ -84,21 +86,23 @@
 		widgetResultTaskGr.setLimit(1);
 		widgetResultTaskGr.query();
 		if (widgetResultTaskGr.next()) {
-			if (widgetResultTaskGr.priority != widget.priority ||
-				!widgetResultTaskGr.description.toString().includes(widget.reason)) {
-				widgetResultTaskGr.priority = widget.priority;
-				widgetResultTaskGr.work_notes += 'Updated Analysis:\nReason for Potential Data Leak: ' + widget.reason;
+			widgetResultTaskGr.priority = widget.priority;
+			if (!widgetResultTaskGr.description.toString().includes(widget.reason)) {
+				widgetResultTaskGr.work_notes += 'Updated Analysis:\n' +
+					'Reason for Potential Data Leak: ' + widget.reason;
 			}
 			
-			return;
+			widgetResultTaskGr.update();
+		} else {		
+			widgetResultTaskGr.newRecord();
+			widgetResultTaskGr.widget = widget.sys_id;
+			widgetResultTaskGr.priority = widget.priority;
+			widgetResultTaskGr.short_description = 'Verify Widget for Potential Data Leak';
+			widgetResultTaskGr.description = 'This widget has been identified as a "Potential Data Leak" by a machine scan.\n' +
+				'The reason is: ' + widget.reason + '\n\n' + 
+				'Please carefully verify if the Widget is aligned to currently known best practice and close this task with a proper closure note.';
+			widgetResultTaskGr.insert();
 		}
-		
-		widgetResultTaskGr.newRecord();
-		widgetResultTaskGr.widget = widget.sys_id;
-		widgetResultTaskGr.priority = widget.priority;
-		widgetResultTaskGr.short_description = 'Verify Widget for Potential Data Leak';
-		widgetResultTaskGr.description = 'This widget has been identified as a "Potential Data Leak" by a machine scan.\nThe reason is: ' + widget.reason + '\n\nPlease carefully verify if the Widget is aligned to currently known best practice and close this task with a proper closure note.';
-		widgetResultTaskGr.insert();
 	});
 	
 	const widgetResultGr = new GlideRecord('x_376096_dla_widget_result');
@@ -115,13 +119,13 @@
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2023-10-21 17:26:55</sys_created_on>
         <sys_id>e79910199742f1103c2d3f56f053af68</sys_id>
-        <sys_mod_count>31</sys_mod_count>
+        <sys_mod_count>35</sys_mod_count>
         <sys_name>analyse_widgets</sys_name>
         <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
         <sys_policy/>
         <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
         <sys_update_name>sys_ui_page_e79910199742f1103c2d3f56f053af68</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2023-10-26 11:30:12</sys_updated_on>
+        <sys_updated_on>2023-10-29 19:35:18</sys_updated_on>
     </sys_ui_page>
 </record_update>

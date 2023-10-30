@@ -2,8 +2,8 @@
     <sys_ui_macro action="INSERT_OR_UPDATE">
         <active>true</active>
         <category>general</category>
-        <description>This UI Macro (with the corresponding UI Formatter) will be able to show the latest version of the ACL Instructions in the ACL Analysis Task.&#13;
-Whenever there is an update to the ACL Instruction, there is no need to update any previously generated Tasks - the latest version of the instruction is always present on the form.</description>
+        <description>This UI Macro and its corresponding UI Formatter is used to show the latest version of the task instructions  on every task.&#13;
+When using a (HTML) field instead, the instructions will not update automatically on pre-existing tasks.</description>
         <media_type/>
         <name>acl_instructions</name>
         <scoped_name>x_376096_dla_acl_instructions</scoped_name>
@@ -11,30 +11,17 @@ Whenever there is an update to the ACL Instruction, there is no need to update a
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2023-10-23 18:17:53</sys_created_on>
         <sys_id>6898b6bd9702b5103c2d3f56f053afb7</sys_id>
-        <sys_mod_count>2</sys_mod_count>
+        <sys_mod_count>4</sys_mod_count>
         <sys_name>acl_instructions</sys_name>
         <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
         <sys_policy/>
         <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
         <sys_update_name>sys_ui_macro_6898b6bd9702b5103c2d3f56f053afb7</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2023-10-28 11:00:36</sys_updated_on>
+        <sys_updated_on>2023-10-29 21:41:52</sys_updated_on>
         <xml><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
 <j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
-	<g2:evaluate>
-		const contentGr = new GlideRecord('content_block_static');
-		contentGr.addQuery('sys_id', '6e03cfdf978e3d103c2d3f56f053af9a');
-		contentGr.setLimit(1);
-		contentGr.query();
-		
-		let instructions = '';
-		if (contentGr.next()) {
-			instructions = contentGr.static_content.toString();
-		}
-	</g2:evaluate>
-	<div style="border: 1px solid; padding: 10px;">
-		<g2:no_escape>$[instructions]</g2:no_escape>
-	</div>
+	<g:macro_invoke macro="x_376096_dla_task_instructions" content_block="6e03cfdf978e3d103c2d3f56f053af9a" />
 </j:jelly>]]></xml>
     </sys_ui_macro>
 </record_update>

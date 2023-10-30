@@ -1,47 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
     <sys_script_include action="INSERT_OR_UPDATE">
-        <access>public</access>
+        <access>package_private</access>
         <active>true</active>
         <api_name>x_376096_dla.DLAUtilClient</api_name>
         <caller_access/>
         <client_callable>true</client_callable>
-        <description/>
+        <description>This Script Include encapsulates all GlideAjax / Client Side calls to the Data Leak Analyser API / Script Include.&#13;
+Security Measures:&#13;
+- Admin only access ensured via ACL (type = client_callable_script_include, role = admin)&#13;
+- Underlying records are wrapped with GlideRecordSecure so that no ACL can be bypassed</description>
         <name>DLAUtilClient</name>
-        <script><![CDATA[var DLAUtilClient = Class.create();
+        <script><![CDATA[/* global global, gs, sn_ws, x_376096_dla */
+/* global Class, GlideRecordSecure, GlideSysAttachment */
+/* eslint no-undef: "error" */
+var DLAUtilClient = Class.create();
 DLAUtilClient.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
 	initialize: function () {
 		global.AbstractAjaxProcessor.prototype.initialize.apply(this, arguments);
 		this.dlaUtil = new x_376096_dla.DLAUtil();
     },
-	
-	getAnalysisStatus: function () {
-		const result = {
-			status: 'error',
-			message: ''
-		};
-		
-		const trackerID = this.getParameter('tracker_id');
-		if (trackerID) {
-			const trackerGr = new GlideRecordSecure('sys_execution_tracker');
-			trackerGr.addQuery('sys_id', trackerID);
-			trackerGr.setLimit(1);
-			trackerGr.query();
-			if (trackerGr.next()) {
-				if (trackerGr.result.toString().includes('cancelled')) {
-					result.cancelled = true;
-				}
-				
-				result.percent_complete = +trackerGr.percent_complete;
-				result.status = 'success';
-			} else {
-				result.message = gs.getMessage('dla_record_unauthorized_or_invalid_record');
-			}
-		} else {
-			result.message = gs.getMessage('dla_invalid_parameter');
-		}
-		
-		return JSON.stringify(result);
-	},
 	
 	analyseHistoricACL: function () {
 		const result = {
@@ -51,35 +28,51 @@ DLAUtilClient.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
 		
 		const aclSysID = this.getParameter('historic_acl');
 		if (aclSysID) {
-			const histACLGr = new GlideRecordSecure('x_376096_dla_historic_acl');
-			histACLGr.addQuery('sys_id', aclSysID);
-			histACLGr.setLimit(1);
-			histACLGr.query();
-			if (histACLGr.next()) {
-				histACLGr.access_token = gs.generateGUID();
-				histACLGr.update();
+			const historicAclGr = new GlideRecordSecure('x_376096_dla_historic_acl');
+			historicAclGr.addQuery('sys_id', aclSysID);
+			historicAclGr.setLimit(1);
+			historicAclGr.query();
+			if (historicAclGr.next()) {
+				// unsure why cleaning up the attachments does not work inside the ACL Analyser...
+				const gsa = new GlideSysAttachment();
+				const attGr = gsa.getAttachments('x_376096_dla_historic_acl', aclSysID);
+				while (attGr.next()) {
+					if (attGr.file_name.toString().startsWith('leaked_')) {
+						gsa.deleteAttachment(attGr.getUniqueValue());
+					}
+				}
 				
-				const rm = new sn_ws.RESTMessageV2();
-				rm.setHttpMethod('get');
-				rm.setEndpoint(gs.getProperty('glide.servlet.uri') + 
-					'api/x_376096_dla/public?access_token=' + histACLGr.access_token + 
-					'&historic_acl=' + histACLGr.sys_id
-				);
-				const response = rm.execute();
-				if (response.getStatusCode() == 200) {
-					const restResult = JSON.parse(response.getBody());
-					if (restResult.result) {
-						if (restResult.result.status == 'success') {
-							result.tracker_id = restResult.result.tracker_id;
-							result.status = 'success';
-						} else {
-							result.message = restResult.result.message;
+				if (historicAclGr.tracker_id) {
+					// analysis is already running
+					result.status = 'success';
+					result.tracker_id = historicAclGr.tracker_id.toString();
+				} else {
+					historicAclGr.access_token = gs.generateGUID();
+					historicAclGr.update();
+
+					const rm = new sn_ws.RESTMessageV2();
+					rm.setHttpMethod('get');
+					rm.setEndpoint(gs.getProperty('glide.servlet.uri') + 
+						'api/x_376096_dla/public?access_token=' + historicAclGr.access_token + 
+						'&historic_acl=' + historicAclGr.sys_id
+					);
+					const response = rm.execute();
+					const statusCode = response.getStatusCode();
+					if (statusCode == 200) {
+						const restResult = JSON.parse(response.getBody());
+						if (restResult.result) {
+							if (restResult.result.status == 'success') {
+								result.tracker_id = restResult.result.tracker_id;
+								result.status = 'success';
+							} else {
+								result.message = restResult.result.message;
+							}
+						} else if (result.error) {
+							result.message = result.error;
 						}
 					} else {
-						result.message = 'REST Failed';
+						result.message = gs.getMessage('dla_rest_call_failed', [statusCode]);
 					}
-				} else {
-					result.message = 'Failed to exec rest call';
 				}
 			} else {
 				result.message = gs.getMessage('dla_record_unauthorized_or_invalid_record');
@@ -97,10 +90,45 @@ DLAUtilClient.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
 			message: ''
 		};
 		
-		const trackerID = this.getParameter('tracker_id');
-		if (trackerID) {
-			new GlideExecutionTracker(trackerID).updateResult({ cancelled: true });
-			result.status = 'success';
+		const historicACLSysID = this.getParameter('historic_acl');
+		if (historicACLSysID) {
+			const historicACLGr = new GlideRecordSecure('x_376096_dla_historic_acl');
+			historicACLGr.addQuery('sys_id', historicACLSysID);
+			historicACLGr.addNotNullQuery('tracker_id');
+			historicACLGr.setLimit(1);
+			historicACLGr.query();
+			if (historicACLGr.next()) {
+				const state = {
+					PENDING: 0,
+					RUNNING: 1,
+					SUCCESSFULL: 2,
+					FAILED: 3,
+					CANCELLED: 4
+				};
+				const trackerID = historicACLGr.tracker_id.toString();
+				const progressGr = new GlideRecordSecure('sys_execution_tracker');
+				progressGr.addQuery('state', 'IN', [state.PENDING, state.RUNNING]);
+				progressGr.addQuery('sys_id', historicACLGr.tracker_id);
+				progressGr.setLimit(1);
+				progressGr.query();
+				if (progressGr.hasNext()) {
+					// analysis finished, but the tracker_id wasn't cleared
+					historicACLGr.tracker_id = '';
+					historicACLGr.update();
+				} else {
+					// the analysis is still running => cancel it
+					//new GlideExecutionTracker(trackerID).updateResult({ cancelled: true });
+					this.dlaUtil._execScript('global', 'SNC.GlideExecutionTracker.getBySysID(trackerID).cancel(message)', {
+						trackerID: trackerID,
+						message: 'Cancellation requested'
+					});
+				}
+
+				result.tracker_id = historicACLGr.tracker_id.toString();
+				result.status = 'success';
+			} else {
+				result.message = gs.getMessage('dla_record_unauthorized_or_invalid_record');
+			}
 		} else {
 			result.message = gs.getMessage('dla_invalid_parameter');
 		}
@@ -165,13 +193,13 @@ DLAUtilClient.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2023-10-28 09:27:17</sys_created_on>
         <sys_id>a8fee697974e3d103c2d3f56f053af31</sys_id>
-        <sys_mod_count>22</sys_mod_count>
+        <sys_mod_count>32</sys_mod_count>
         <sys_name>DLAUtilClient</sys_name>
         <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
         <sys_policy/>
         <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
         <sys_update_name>sys_script_include_a8fee697974e3d103c2d3f56f053af31</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2023-10-28 22:52:02</sys_updated_on>
+        <sys_updated_on>2023-10-29 15:07:46</sys_updated_on>
     </sys_script_include>
 </record_update>
