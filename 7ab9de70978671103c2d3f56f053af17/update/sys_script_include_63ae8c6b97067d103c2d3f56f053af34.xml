@@ -12,7 +12,7 @@ If a given record is "exposed" via the Historic ACL, it was leaked when the tabl
 This Script Include is exclusively accessed via the Scripted REST API '/api/x_376096_dla/public' (GlideScriptedHierarchicalWorker). </description>
         <name>DLAHistoricACLAnalyser</name>
         <script><![CDATA[/* global global, gs, x_376096_dla */
-/* global Class, GlideRecord, GlideSysAttachment, GlideExecutionTracker */
+/* global Class, GlideRecord, GlideSysAttachment, GlideTime */
 /* eslint no-undef: "error" */
 var DLAHistoricACLAnalyser = Class.create();
 DLAHistoricACLAnalyser.prototype = {
@@ -91,6 +91,7 @@ DLAHistoricACLAnalyser.prototype = {
 							const allBatches = [];
 							let currentBatch = [];
 
+							let checkedRecordCount = 0;
 							const percentPerRecord = 100 / recordCount;
 							let percentageComplete = 0;
 							let leakedRecords = 0;
@@ -98,8 +99,10 @@ DLAHistoricACLAnalyser.prototype = {
 							for (; !cancelled && anyGr.next(); cancelled = this._trackerIsCancelled()) {
 								this._trackerUpdateMessage(
 									gs.getMessage('dla_acl_analysis_testing_record', [
+										String(++checkedRecordCount), recordCount,
 										table, anyGr.getDisplayValue()
-									])
+									]),
+									!anyGr.hasNext() // force an tracker update if this is the last record
 								);
 
 								const recordSysID = anyGr.getUniqueValue();
@@ -173,14 +176,36 @@ DLAHistoricACLAnalyser.prototype = {
 		return result;
 	},
 	
-	_trackerUpdateMessage: function (message) {
-		const globalTracker = new global.AJAXExecutionTracker();
-		const objs = {
-			sysparm_tracker_id: this.tracker_id,
-			sysparm_message: message
-		};
-		globalTracker.getParameter = function (n) { return objs[n]; };
-		globalTracker.updateMessage();
+	_trackerUpdateMessage: function (message, forced) {
+		const currentSecond = new GlideTime().getSeconds();
+		if (!forced && this.lastUpdateSecond != undefined && this.lastUpdateSecond == currentSecond) {
+			return;
+		}
+		
+		if (forced) {
+			this.dlaUtil._execScript('global', 'gs.sleep(1000);');
+		}
+		
+		this.lastUpdateSecond = currentSecond;		
+		let script = 'SNC.GlideExecutionTracker.getBySysID("' + this.tracker_id + '")' +
+			'.updateMessage(GlideStringUtil.base64Decode("' + gs.base64Encode(message) + '"))';
+		
+		this.dlaUtil._execScript('global',
+				'var sched = new ScheduleOnce();' +
+				'sched.script = script;' +
+				'sched.setLabel("DLA Update Tracker Message");' +
+				'sched.schedule();', {
+			script: script
+		});
+		
+		// MKR 30.10.2023 - the code below isn't allowed in guest-user transactions!
+// 		const globalTracker = new global.AJAXExecutionTracker();
+// 		const objs = {
+// 			sysparm_tracker_id: this.tracker_id,
+// 			sysparm_message: message
+// 		};
+// 		globalTracker.getParameter = function (n) { return objs[n]; };
+// 		globalTracker.updateMessage();
 	},
 	
 	_trackerIsCancelled: function () {
@@ -200,32 +225,73 @@ DLAHistoricACLAnalyser.prototype = {
 	},
 	
 	_trackerIncrementPercentComplete: function () {
-		const globalTracker = new global.AJAXExecutionTracker();
-		const objs = {
-			sysparm_tracker_id: this.tracker_id
-		};
-		globalTracker.getParameter = function (n) { return objs[n]; };
-		globalTracker.incrementPercentComplete();
+		this.dlaUtil._execScript('global', 
+				'var sched = new ScheduleOnce();' +
+				'sched.script = script;' +
+				'sched.setLabel("DLA Update Tracker Message");' +
+				'sched.schedule();', {
+			script: 'SNC.GlideExecutionTracker.getBySysID("' + this.tracker_id + '").incrementPercentComplete()'
+		});
+
+		// MKR 30.10.2023 - the code below isn't allowed in guest-user transactions!
+// 		const globalTracker = new global.AJAXExecutionTracker();
+// 		const objs = {
+// 			sysparm_tracker_id: this.tracker_id
+// 		};
+// 		globalTracker.getParameter = function (n) { return objs[n]; };
+// 		globalTracker.incrementPercentComplete();
 	},
 	
 	_trackerSuccess: function (message) {
-		const globalTracker = new global.AJAXExecutionTracker();
-		const objs = {
-			sysparm_tracker_id: this.tracker_id,
-			sysparm_message: message
-		};
-		globalTracker.getParameter = function (n) { return objs[n]; };
-		globalTracker.success();
+		let script = 'SNC.GlideExecutionTracker.getBySysID("' + this.tracker_id + '").success(';
+		if (message) {
+			script += 'GlideStringUtil.base64Decode("' + gs.base64Encode(message) + '")';
+		}
+		script += ')';
+		
+		this.dlaUtil._execScript('global', 'gs.sleep(1000);');
+		this.dlaUtil._execScript('global',
+				'var sched = new ScheduleOnce();' +
+				'sched.script = script;' +
+				'sched.setLabel("DLA Update Success Message");' +
+				'sched.schedule();', {
+			script: script
+		});		
+		
+		// MKR 30.10.2023 - the code below isn't allowed in guest-user transactions!
+// 		const globalTracker = new global.AJAXExecutionTracker();
+// 		const objs = {
+// 			sysparm_tracker_id: this.tracker_id,
+// 			sysparm_message: message
+// 		};
+// 		globalTracker.getParameter = function (n) { return objs[n]; };
+// 		globalTracker.success();
 	},
 
 	_trackerFail: function (message) {
-		const globalTracker = new global.AJAXExecutionTracker();
-		const objs = {
-			sysparm_tracker_id: this.tracker_id,
-			sysparm_message: message
-		};
-		globalTracker.getParameter = function (n) { return objs[n]; };
-		globalTracker.fail();
+		let script = 'SNC.GlideExecutionTracker.getBySysID("' + this.tracker_id + '").fail(';
+		if (message) {
+			script += 'GlideStringUtil.base64Decode("' + gs.base64Encode(message) + '")';
+		}
+		script += ')';
+		
+		this.dlaUtil._execScript('global', 'gs.sleep(1000);');
+		this.dlaUtil._execScript('global',
+				'var sched = new ScheduleOnce();' +
+				'sched.script = script;' +
+				'sched.setLabel("DLA Update Fail Message");' +
+				'sched.schedule();', {
+			script: script
+		});		
+		
+		// MKR 30.10.2023 - the code below isn't allowed in guest-user transactions!
+// 		const globalTracker = new global.AJAXExecutionTracker();
+// 		const objs = {
+// 			sysparm_tracker_id: this.tracker_id,
+// 			sysparm_message: message
+// 		};
+// 		globalTracker.getParameter = function (n) { return objs[n]; };
+// 		globalTracker.fail();
 	},
 
     type: 'DLAHistoricACLAnalyser'
@@ -234,13 +300,13 @@ DLAHistoricACLAnalyser.prototype = {
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2023-10-28 16:43:49</sys_created_on>
         <sys_id>63ae8c6b97067d103c2d3f56f053af34</sys_id>
-        <sys_mod_count>62</sys_mod_count>
+        <sys_mod_count>68</sys_mod_count>
         <sys_name>DLAHistoricACLAnalyser</sys_name>
         <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
         <sys_policy/>
         <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
         <sys_update_name>sys_script_include_63ae8c6b97067d103c2d3f56f053af34</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2023-10-30 10:40:40</sys_updated_on>
+        <sys_updated_on>2023-10-30 12:46:12</sys_updated_on>
     </sys_script_include>
 </record_update>
