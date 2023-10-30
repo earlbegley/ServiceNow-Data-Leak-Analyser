@@ -31,15 +31,20 @@
 				historicAclGr.access_token = '';
 				historicAclGr.update();
 				
+				const context = {
+					tracker_id: null,
+					historic_acl: historicAclGr.getUniqueValue()
+				};
+				
 				const worker = new GlideScriptedHierarchicalWorker();
 				worker.setProgressName('Historic ACL Analysis');
 				worker.setScriptIncludeName('x_376096_dla.DLAHistoricACLAnalyser');
 				worker.setScriptIncludeMethod('analyseHistoricACL');
-				worker.putMethodArg('historicAclGr', historicAclGr);
+				worker.putMethodArg('context', context);
 				worker.setBackground(true);
 				worker.start();
 
-				result.tracker_id = worker.getProgressID();
+				result.tracker_id = context.tracker_id = worker.getProgressID();
 				result.status = 'success';
 			} else {
 				result.message = gs.getMessage('dla_record_unauthorized_or_invalid_record');
@@ -68,14 +73,14 @@
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2023-10-25 05:12:35</sys_created_on>
         <sys_id>39879e1a97c239103c2d3f56f053af87</sys_id>
-        <sys_mod_count>40</sys_mod_count>
+        <sys_mod_count>44</sys_mod_count>
         <sys_name>Extract</sys_name>
         <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
         <sys_policy/>
         <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
         <sys_update_name>sys_ws_operation_39879e1a97c239103c2d3f56f053af87</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2023-10-29 06:55:54</sys_updated_on>
+        <sys_updated_on>2023-10-30 10:10:15</sys_updated_on>
         <web_service_definition display_value="Extract Public">1c771e1a97c239103c2d3f56f053af5e</web_service_definition>
         <web_service_version/>
     </sys_ws_operation>

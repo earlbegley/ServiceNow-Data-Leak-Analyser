@@ -106,25 +106,26 @@ DLAUtilClient.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
 					CANCELLED: 4
 				};
 				const trackerID = historicACLGr.tracker_id.toString();
+
 				const progressGr = new GlideRecordSecure('sys_execution_tracker');
+				progressGr.addQuery('sys_id', trackerID);
 				progressGr.addQuery('state', 'IN', [state.PENDING, state.RUNNING]);
-				progressGr.addQuery('sys_id', historicACLGr.tracker_id);
 				progressGr.setLimit(1);
 				progressGr.query();
-				if (progressGr.hasNext()) {
+				if (!progressGr.hasNext()) {
 					// analysis finished, but the tracker_id wasn't cleared
 					historicACLGr.tracker_id = '';
 					historicACLGr.update();
 				} else {
 					// the analysis is still running => cancel it
-					//new GlideExecutionTracker(trackerID).updateResult({ cancelled: true });
 					this.dlaUtil._execScript('global', 'SNC.GlideExecutionTracker.getBySysID(trackerID).cancel(message)', {
 						trackerID: trackerID,
 						message: 'Cancellation requested'
 					});
 				}
 
-				result.tracker_id = historicACLGr.tracker_id.toString();
+				// note: the running process will reset the tracker_id on the Historic ACL Record
+				result.tracker_id = trackerID;
 				result.status = 'success';
 			} else {
 				result.message = gs.getMessage('dla_record_unauthorized_or_invalid_record');
@@ -193,13 +194,13 @@ DLAUtilClient.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2023-10-28 09:27:17</sys_created_on>
         <sys_id>a8fee697974e3d103c2d3f56f053af31</sys_id>
-        <sys_mod_count>32</sys_mod_count>
+        <sys_mod_count>39</sys_mod_count>
         <sys_name>DLAUtilClient</sys_name>
         <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
         <sys_policy/>
         <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
         <sys_update_name>sys_script_include_a8fee697974e3d103c2d3f56f053af31</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2023-10-29 15:07:46</sys_updated_on>
+        <sys_updated_on>2023-10-30 10:34:50</sys_updated_on>
     </sys_script_include>
 </record_update>

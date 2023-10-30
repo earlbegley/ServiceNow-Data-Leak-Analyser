@@ -30,7 +30,7 @@
         <name>Cancel Analysis</name>
         <onclick>cancelHistoricACLAnalysis()</onclick>
         <order>100</order>
-        <script><![CDATA[/* global GlideAjax, rowSysId, g_form, GlideModal */
+        <script><![CDATA[/* global GlideAjax, rowSysId, g_form, GlideModal, g_list, setTimeout */
 /* eslint no-undef: "error" */
 function cancelHistoricACLAnalysis() {
 	var ga = new GlideAjax('x_376096_dla.DLAUtilClient');
@@ -48,6 +48,26 @@ function cancelHistoricACLAnalysis() {
 			var dd = new GlideModal('hierarchical_progress_viewer', false, '40em', '10em');
 			dd.setTitle('Status');
 			dd.setPreference('sysparm_renderer_execution_id', result.tracker_id);
+			
+			var completed = false;
+			dd.on('executionComplete', function() {
+				completed = true;
+				if (typeof g_list != 'undefined') {
+					g_list.refresh();
+				}
+			});
+			dd.on('beforeclose', function () {
+				// if the window is closed before the analysis completes,
+				// the 'Cancel Analysis' button needs to be shown
+				if (completed) {
+					if (g_form.getTableName() == 'x_376096_dla_historic_acl') {
+						// reload form to show latest attachments and buttons
+						setTimeout(function () {
+							this.reloadWindow(this);
+						});
+					}
+				}
+			});
 			dd.render();
 		} else if (result.message) {
 			g_form.addErrorMessage(result.message);
@@ -64,7 +84,7 @@ function cancelHistoricACLAnalysis() {
         <sys_domain>global</sys_domain>
         <sys_domain_path>/</sys_domain_path>
         <sys_id>cad7d72797c2bd103c2d3f56f053af32</sys_id>
-        <sys_mod_count>0</sys_mod_count>
+        <sys_mod_count>1</sys_mod_count>
         <sys_name>Cancel Analysis</sys_name>
         <sys_overrides/>
         <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
@@ -72,7 +92,7 @@ function cancelHistoricACLAnalysis() {
         <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
         <sys_update_name>sys_ui_action_cad7d72797c2bd103c2d3f56f053af32</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2023-10-29 07:10:09</sys_updated_on>
+        <sys_updated_on>2023-10-30 10:13:32</sys_updated_on>
         <table>x_376096_dla_historic_acl</table>
         <ui11_compatible>false</ui11_compatible>
         <ui16_compatible>false</ui16_compatible>
