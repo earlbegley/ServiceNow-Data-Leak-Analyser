@@ -59,6 +59,8 @@ DLAHistoricACLAnalyser.prototype = {
 
 							result.status = 'success';
 						} else {
+							// no need to test all records for widget-simple-list transactions as those have a hardcoded limit to 500 (and a fixed orderByDesc)
+							const isSimpleListAccess = historicAclGr.leak_result.widget.id == 'widget-simple-list';
 							const scope = tableGr.sys_scope.toString();
 							const anyGr = this.dlaUtil._execScript(scope, 
 								'(function () {' +
@@ -73,12 +75,17 @@ DLAHistoricACLAnalyser.prototype = {
 											'}).join("^NQ")' +
 										');' +
 									'}' +
+									'if (simpleList) {' +
+										'anyGr.orderByDesc(undefined);' +
+										'anyGr.setLimit(500);' +
+									'}' +
 									'anyGr.query();' +
 									'return anyGr;' +
 								'})();', {
 								tableName: table,
 								encodedQuery: historicAclGr.condition,
-								date: historicAclGr.leak_result.attempt_date
+								date: historicAclGr.leak_result.attempt_date,
+								simpleList: isSimpleListAccess
 							});
 
 							const recordCount = anyGr.getRowCount();
@@ -300,13 +307,13 @@ DLAHistoricACLAnalyser.prototype = {
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2023-10-28 16:43:49</sys_created_on>
         <sys_id>63ae8c6b97067d103c2d3f56f053af34</sys_id>
-        <sys_mod_count>68</sys_mod_count>
+        <sys_mod_count>69</sys_mod_count>
         <sys_name>DLAHistoricACLAnalyser</sys_name>
         <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
         <sys_policy/>
         <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
         <sys_update_name>sys_script_include_63ae8c6b97067d103c2d3f56f053af34</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2023-10-30 12:46:12</sys_updated_on>
+        <sys_updated_on>2023-10-31 17:18:17</sys_updated_on>
     </sys_script_include>
 </record_update>
