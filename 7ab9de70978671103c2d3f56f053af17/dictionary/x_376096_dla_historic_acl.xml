@@ -16,7 +16,7 @@
                 <element inactive_on_update="false" label="Unknown" sequence="4" value="unknown"/>
             </choice>
         </element>
-        <element label="Roles" max_length="40" name="roles" type="string"/>
+        <element label="Roles" max_length="4000" name="roles" type="string"/>
         <element label="Scope" max_length="32" name="scope" reference="sys_scope" type="reference"/>
         <element label="Script" max_length="8000" name="script" type="script"/>
         <element label="Tracker ID" max_length="40" name="tracker_id" type="string"/>
