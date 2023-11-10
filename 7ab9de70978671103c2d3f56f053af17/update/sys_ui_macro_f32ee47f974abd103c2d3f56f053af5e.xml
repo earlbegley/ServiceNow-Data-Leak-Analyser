@@ -4,43 +4,53 @@
         <category>general</category>
         <description/>
         <media_type/>
-        <name>dxc_branding</name>
-        <scoped_name>x_376096_dla_dxc_branding</scoped_name>
+        <name>dashboard_actions</name>
+        <scoped_name>x_376096_dla_dashboard_actions</scoped_name>
         <sys_class_name>sys_ui_macro</sys_class_name>
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2023-10-29 13:22:49</sys_created_on>
         <sys_id>f32ee47f974abd103c2d3f56f053af5e</sys_id>
-        <sys_mod_count>3</sys_mod_count>
-        <sys_name>dxc_branding</sys_name>
+        <sys_mod_count>16</sys_mod_count>
+        <sys_name>dashboard_actions</sys_name>
         <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
         <sys_policy/>
         <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
         <sys_update_name>sys_ui_macro_f32ee47f974abd103c2d3f56f053af5e</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2023-10-29 19:34:46</sys_updated_on>
+        <sys_updated_on>2023-11-10 08:01:47</sys_updated_on>
         <xml><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
 <j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
-	<script>
-		(function () {
-			var root = window.document.querySelector(':root');
-			var topRoot = window.top.document.querySelector(':root');
-			if (root $[AND] topRoot) {
-				var computedStyles = window.getComputedStyle(topRoot);
-				['--now-font-family'].forEach(function (propertyName) {
-					var propertyValue = computedStyles.getPropertyValue(propertyName);
-					root.style.setProperty(propertyName, propertyValue);
-				});
-			}
-		})();
-	</script>
+	<j2:set var="jvar_hide_response_time" value="true" />
+	<g2:evaluate>
+		const appGr = new GlideRecord('sys_app');
+		appGr.addQuery('sys_id', '7ab9de70978671103c2d3f56f053af17');
+		appGr.setLimit(1);
+		appGr.query();
+		let dlaVersion = '';
+		if (appGr.next()) {
+			dlaVersion = appGr.version.toString();
+		}
+	</g2:evaluate>
 	<style>
-		.dxc-info {
+		body {
+			margin: 8px;
+		}
+		
+		td {
+			padding: 1px;
+		}
+		
+		input[type="checkbox"] {
+			margin: 3px 3px 3px 4px;
+		}
+		
+		.dla-vendor {
 			position: absolute;
 			right: 0px;
 			bottom: 0px;
 		}
 		
-		.dxc-info::before {
+		.dla-vendor::before {
 			font-size: 0.7rem;
 			display: block;
 			text-align: right;
@@ -48,18 +58,27 @@
 			content: "Powered by";
 		}
 		
-		.dxc-info img {
+		.dla-vendor img {
 			width: 86px;
 			height: 57px;
+		}
+		
+		.dla-version {
+			position: absolute;
+			left: 0px;
+			bottom: 0px;
+			font-size: 0.9rem;
+			padding: 0px 0px 10px 10px;
 		}
 		
 		button {
 			margin-top: 10px;
 		}
 	</style>
-	<div class="dxc-info">
+	<div class="dla-vendor">
 		<img src="x_376096_dla.dxc_technology_logo.png" />
 	</div>
+	<span class="dla-version">v. $[dlaVersion]</span>
 </j:jelly>]]></xml>
     </sys_ui_macro>
 </record_update>

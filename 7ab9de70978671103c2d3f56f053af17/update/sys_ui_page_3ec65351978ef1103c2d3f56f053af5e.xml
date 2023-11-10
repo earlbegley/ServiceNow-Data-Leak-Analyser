@@ -3,11 +3,11 @@
         <category>general</category>
         <client_script/>
         <description/>
-        <direct>true</direct>
+        <direct>false</direct>
         <endpoint>x_376096_dla_analyse_leaks.do</endpoint>
         <html><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
 <j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
-	<g:inline template="x_376096_dla_dxc_branding.xml"/>
+	<g:inline template="x_376096_dla_dashboard_actions.xml"/>
 	<g2:evaluate var="jvar_refresh" expression="RP.getParameterValue('refresh')" />
 	<j2:if test="$[!empty(jvar_refresh)]">
 		<script>
@@ -281,13 +281,13 @@
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2023-10-22 07:12:58</sys_created_on>
         <sys_id>3ec65351978ef1103c2d3f56f053af5e</sys_id>
-        <sys_mod_count>45</sys_mod_count>
+        <sys_mod_count>47</sys_mod_count>
         <sys_name>analyse_leaks</sys_name>
         <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
         <sys_policy/>
         <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
         <sys_update_name>sys_ui_page_3ec65351978ef1103c2d3f56f053af5e</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2023-11-10 00:07:35</sys_updated_on>
+        <sys_updated_on>2023-11-10 08:00:33</sys_updated_on>
     </sys_ui_page>
 </record_update>
