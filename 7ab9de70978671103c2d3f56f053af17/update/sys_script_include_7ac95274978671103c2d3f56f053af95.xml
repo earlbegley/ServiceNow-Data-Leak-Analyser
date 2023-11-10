@@ -395,14 +395,26 @@ DLAUtil.prototype = {
 			});
 		}
 		
-		const regex = /^[/]?api\/now\/sp\/widget\/(.*?)\?(?=.*t=([^&]+)|)(?=.*f=([^&]+)|)/;
+		//const regex = /^[/]?api\/now\/sp\/widget\/(.*?)\?(?=.*t=([^&]+)|)(?=.*f=([^&]+)|)/;
+		const widgetRegex = /^\/api\/now\/sp\/widget\/(.*?)[?&$]/;
+		const tableRegex = /^\/api\/now\/sp\/widget\/.*?\?(?:.*t=([^&]+)|)/;
+		const fieldRegex = /^\/api\/now\/sp\/widget\/.*?\?(?:.*f=([^&]+)|)/;
 		const widgetSimpleListSysID = '5b255672cb03020000f8d856634c9c28';
 		for (let i = 0; i < transData.length; i++) {
-			const match = transData[i].url.match(regex);
-			if (match) {
-				const widget = match[1];
-				const table = match[2];
-				const field = match[3];
+			const widgetMatch = transData[i].url.match(widgetRegex);
+			const tableMatch = transData[i].url.match(tableRegex);
+			if (widgetMatch && tableMatch) {
+				const widget = widgetMatch[1];
+				const table = tableMatch[1];
+				const fieldMatch = transData[i].url.match(fieldRegex);
+				let field = '';
+				if (fieldMatch) {
+					field = fieldMatch[1];
+				}
+				
+				if (!widget || !table) {
+					continue;
+				}
 				
 				if (!gs.tableExists(table)) {
 					analysisResult.prevented.push({
@@ -455,7 +467,7 @@ DLAUtil.prototype = {
 					leakedFields = this._execScript('global',
 						'(function () {' +
 							'var anyGr = new GlideRecord(table);' +
-							'if (anyGr.isValidField(field)) {' +
+							'if (field && anyGr.isValidField(field)) {' +
 								'return field;' +
 							'} else {' +
 								'return anyGr.getDisplayName();' +
@@ -491,13 +503,13 @@ DLAUtil.prototype = {
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2023-10-20 16:17:18</sys_created_on>
         <sys_id>7ac95274978671103c2d3f56f053af95</sys_id>
-        <sys_mod_count>105</sys_mod_count>
+        <sys_mod_count>107</sys_mod_count>
         <sys_name>DLAUtil</sys_name>
         <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
         <sys_policy/>
         <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
         <sys_update_name>sys_script_include_7ac95274978671103c2d3f56f053af95</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2023-11-10 00:11:35</sys_updated_on>
+        <sys_updated_on>2023-11-10 10:35:24</sys_updated_on>
     </sys_script_include>
 </record_update>
