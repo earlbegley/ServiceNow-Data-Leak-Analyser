@@ -71,6 +71,7 @@ DLAUtil.prototype = {
 				'var ms = gdt.getNumericValue();' +
 				'var dateCounter = Number(ms).toString(16) + "0000001";' +
 				'var versionGr = new GlideRecord("sys_update_version");' +
+				'versionGr.addQuery("state", "IN", ["current", "previous"]);' +
 				'versionGr.addQuery("name", "STARTSWITH", "sys_security_acl");' +
 				'versionGr.addQuery("sys_recorded_at", "<=", dateCounter);' +
 				'versionGr.addQuery("record_name", tableName);' +
@@ -113,6 +114,7 @@ DLAUtil.prototype = {
 					'var ms = gdt.getNumericValue();' +
 					'var dateCounter = Number(ms).toString(16) + "0000001";' +
 					'var versionGr = new GlideRecord("sys_update_version");' +
+					'versionGr.addQuery("state", "IN", ["current", "previous"]);' +
 					'versionGr.addQuery("name", "STARTSWITH", "sys_security_acl_role");' +
 					'versionGr.addQuery("sys_recorded_at", "<=", dateCounter);' +
 					'versionGr.orderByDesc("sys_recorded_at");' +
@@ -393,18 +395,21 @@ DLAUtil.prototype = {
 			});
 		}
 		
-		const regex = /^[/]?api\/now\/sp\/widget\/(.*?)\?.*(?:t|table)=(.*?)(?:&|$)/;
+		const regex = /^[/]?api\/now\/sp\/widget\/(.*?)\?(?=.*t=([^&]+)|)(?=.*f=([^&]+)|)/;
 		const widgetSimpleListSysID = '5b255672cb03020000f8d856634c9c28';
 		for (let i = 0; i < transData.length; i++) {
 			const match = transData[i].url.match(regex);
 			if (match) {
 				const widget = match[1];
 				const table = match[2];
+				const field = match[3];
 				
 				if (!gs.tableExists(table)) {
 					analysisResult.prevented.push({
 						widget: getWidgetSysId(widget),
 						table: table,
+						field: field,
+						leaked_fields: '',
 						transaction: transData[i].sys_id,
 						reason: 'invalid table accessed',
 						attempt_date: transData[i].date,
@@ -415,30 +420,61 @@ DLAUtil.prototype = {
 				}
 				
 				const acls = this.getHistoricACLs(table, transData[i].date);
-				
-				// special case 'widget-simple-list': since March 2023, there is a 'public-access' which prevents leaks!
-				if (widget == 'widget-simple-list' || widget == widgetSimpleListSysID) {
-					if (acls.length && !acls.find(acl => acl.roles.length == 0 || acl.roles.includes('public'))) {
-						// if the table is not 'public', the simple list widget hasn't returned any results
-						// and as such the current table isn't subjected to a data leak (at least not through this widget)
-						analysisResult.prevented.push({
-							widget: getWidgetSysId(widget),
-							table: table,
-							transaction: transData[i].sys_id,
-							reason: 'protected by SNCACLUtil::hasPublicAccess',
-							attempt_date: transData[i].date,
-							leak_size: transData[i].size,
-							acls: acls
-						});
-						continue;
+				if (acls.length && !acls.find(acl => acl.roles.length == 0 || acl.roles.includes('public'))) {
+					let reason = 'Protected by ACL (no public ACL)';
+					if (widget == 'widget-simple-list' || widget == widgetSimpleListSysID) {
+						// special case 'widget-simple-list': since March 2023, there is a 'public-access' which prevents leaks!
+						// this is done by SNCACLUtil::hasPublicAccess which checks if a explicit public ACL-role is set
+						reason = 'protected by SNCACLUtil::hasPublicAccess';
 					}
+					
+					// if the table is not 'public', the simple list widget hasn't returned any results
+					// and as such the current table isn't subjected to a data leak (at least not through this widget)
+					analysisResult.prevented.push({
+						widget: getWidgetSysId(widget),
+						table: table,
+						field: field,
+						leaked_fields: '',
+						transaction: transData[i].sys_id,
+						reason: reason,
+						attempt_date: transData[i].date,
+						leak_size: transData[i].size,
+						acls: acls
+					});
+					continue;
+				}
+
+				const tableGr = new GlideRecord('sys_db_object');
+				tableGr.addQuery('name', table);
+				tableGr.setLimit(1);
+				tableGr.query();
+				
+				let leakedFields = '';
+				if (tableGr.next()) {
+					const scope = tableGr.sys_scope.toString();
+					leakedFields = this._execScript('global',
+						'(function () {' +
+							'var anyGr = new GlideRecord(table);' +
+							'if (anyGr.isValidField(field)) {' +
+								'return field;' +
+							'} else {' +
+								'return anyGr.getDisplayName();' +
+							'}' +
+						'})()', {
+						table: table,
+						field: field
+					});
+				} else {
+					leakedFields = 'Unable to determine - Please check Table, Widget and Transaction';
 				}
 				
 				analysisResult.breached.push({
 					widget: getWidgetSysId(widget),
 					table: table,
+					field: field,
+					leaked_fields: leakedFields,
 					transaction: transData[i].sys_id,
-					reason: 'public access ',
+					reason: 'public access possible',
 					leak_size: transData[i].size,
 					attempt_date: transData[i].date,
 					acls: acls
@@ -455,13 +491,13 @@ DLAUtil.prototype = {
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2023-10-20 16:17:18</sys_created_on>
         <sys_id>7ac95274978671103c2d3f56f053af95</sys_id>
-        <sys_mod_count>100</sys_mod_count>
+        <sys_mod_count>105</sys_mod_count>
         <sys_name>DLAUtil</sys_name>
         <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
         <sys_policy/>
         <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
         <sys_update_name>sys_script_include_7ac95274978671103c2d3f56f053af95</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2023-10-29 10:57:43</sys_updated_on>
+        <sys_updated_on>2023-11-10 00:11:35</sys_updated_on>
     </sys_script_include>
 </record_update>

@@ -92,14 +92,20 @@
 		leakResultGr.query();
 		if (leakResultGr.next()) {
 			const leakResultDescription = leakResultGr.description.toString();
-			if (leakResultGr.widget != prevented.widget ||
+			if (leakResultGr.short_description == 'Data Leak prevented' ||
+				leakResultGr.widget != prevented.widget ||
 				leakResultGr.table != prevented.table ||
+				leakResultGr.field != prevented.field ||
+				leakResultGr.leaked_fields != prevented.leaked_fields ||
 				leakResultGr.leak_size != prevented.leak_size ||
 				leakResultGr.attempt_date != prevented.attempt_date ||
 				!leakResultDescription.includes(prevented.reason)) {
+				leakResultGr.short_description = 'Data Leak prevented';
 				leakResultGr.widget = prevented.widget;
 				leakResultGr.leak_size = prevented.leak_size;
 				leakResultGr.table = prevented.table;
+				leakResultGr.field = prevented.field;
+				leakResultGr.leaked_fields = prevented.leaked_fields;
 				leakResultGr.attempt_date = prevented.attempt_date;
 				
 				if (!leakResultDescription.includes(prevented.reason)) {
@@ -117,6 +123,8 @@
 			leakResultGr.transaction = prevented.transaction;
 			leakResultGr.widget = prevented.widget;
 			leakResultGr.table = prevented.table;
+			leakResultGr.field = prevented.field;
+			leakResultGr.leaked_fields = prevented.leaked_fields;
 			leakResultGr.attempt_date = prevented.attempt_date;
 			leakResultGr.leak_size = prevented.leak_size;
 			leakResultGr.short_description = 'Data Leak prevented';
@@ -140,13 +148,19 @@
 		leakResultGr.query();
 		if (leakResultGr.next()) {
 			const leakResultDescription = leakResultGr.description.toString();
-			if (leakResultGr.widget != breached.widget ||
+			if (leakResultGr.short_description != 'Potential Data Leak' ||
+				leakResultGr.widget != breached.widget ||
 				leakResultGr.table != breached.table ||
+				leakResultGr.field != breached.field ||
+				leakResultGr.leaked_fields != breached.leaked_fields ||
 				leakResultGr.leak_size != breached.leak_size ||
 				leakResultGr.attempt_date != breached.attempt_date ||
 				!leakResultDescription.includes(breached.reason)) {
+				leakResultGr.short_description = 'Potential Data Leak';
 				leakResultGr.widget = breached.widget;
 				leakResultGr.table = breached.table;
+				leakResultGr.field = breached.field;
+				leakResultGr.leaked_fields = breached.leaked_fields;
 				leakResultGr.leak_size = breached.leak_size;
 				leakResultGr.attempt_date = breached.attempt_date;
 				
@@ -165,6 +179,8 @@
 			leakResultGr.transaction = breached.transaction;
 			leakResultGr.widget = breached.widget;
 			leakResultGr.table = breached.table;
+			leakResultGr.field = breached.field;
+			leakResultGr.leaked_fields = breached.leaked_fields;
 			leakResultGr.attempt_date = breached.attempt_date;
 			leakResultGr.leak_size = breached.leak_size;
 			leakResultGr.short_description = 'Potential Data Leak';
@@ -178,12 +194,15 @@
 		}
 	});
 	
-	const leakResultGr = new GlideRecord('x_376096_dla_leak_result');
-	leakResultGr.addQuery('active', true);
-	leakResultGr.addQuery('transaction', 'NOT IN', transactions);
-	leakResultGr.setValue('state', 3); // closed complete
-	leakResultGr.setValue('work_notes', 'Task has been closed as the affected Leak is no longer included in the latest Leak analysis.');
-	leakResultGr.updateMultiple();
+
+	// 2023-11-10 MKR: Deactivated Automatic Close as transaction cleanup will cause this
+	// -> is there any reason to actually close a task by the analysis?
+// 	const leakResultGr = new GlideRecord('x_376096_dla_leak_result');
+// 	leakResultGr.addQuery('active', true);
+// 	leakResultGr.addQuery('transaction', 'NOT IN', transactions);
+// 	leakResultGr.setValue('state', 3); // closed complete
+// 	leakResultGr.setValue('work_notes', 'Task has been closed as the affected Leak is no longer included in the latest Leak analysis.');
+// 	leakResultGr.updateMultiple();
 	
 	// prevent refresh loop when there analysis hasn't yielded any results
 	response.sendRedirect('x_376096_dla_analyse_leaks.do?refresh=true&skip_analysis=' + String(transactions.length == 0));
@@ -262,13 +281,13 @@
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2023-10-22 07:12:58</sys_created_on>
         <sys_id>3ec65351978ef1103c2d3f56f053af5e</sys_id>
-        <sys_mod_count>41</sys_mod_count>
+        <sys_mod_count>45</sys_mod_count>
         <sys_name>analyse_leaks</sys_name>
         <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
         <sys_policy/>
         <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
         <sys_update_name>sys_ui_page_3ec65351978ef1103c2d3f56f053af5e</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2023-10-29 19:44:56</sys_updated_on>
+        <sys_updated_on>2023-11-10 00:07:35</sys_updated_on>
     </sys_ui_page>
 </record_update>
