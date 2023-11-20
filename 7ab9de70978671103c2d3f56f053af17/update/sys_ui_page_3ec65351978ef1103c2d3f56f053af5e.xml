@@ -92,7 +92,7 @@
 		leakResultGr.query();
 		if (leakResultGr.next()) {
 			const leakResultDescription = leakResultGr.description.toString();
-			if (leakResultGr.short_description == 'Data Leak prevented' ||
+			if (leakResultGr.short_description != 'Data Leak prevented' ||
 				leakResultGr.widget != prevented.widget ||
 				leakResultGr.table != prevented.table ||
 				leakResultGr.field != prevented.field ||
@@ -281,13 +281,13 @@
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2023-10-22 07:12:58</sys_created_on>
         <sys_id>3ec65351978ef1103c2d3f56f053af5e</sys_id>
-        <sys_mod_count>47</sys_mod_count>
+        <sys_mod_count>48</sys_mod_count>
         <sys_name>analyse_leaks</sys_name>
         <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
         <sys_policy/>
         <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
         <sys_update_name>sys_ui_page_3ec65351978ef1103c2d3f56f053af5e</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2023-11-10 08:00:33</sys_updated_on>
+        <sys_updated_on>2023-11-20 16:05:15</sys_updated_on>
     </sys_ui_page>
 </record_update>

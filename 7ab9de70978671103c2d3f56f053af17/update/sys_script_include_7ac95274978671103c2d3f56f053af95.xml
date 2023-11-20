@@ -18,6 +18,64 @@ DLAUtil.prototype = {
 		
     },
 	
+	getHistoricWidget: function (widgetSysId, date) {
+		const appFileWidget = this._execScript('global',
+			'(function () {' +
+				'var widget = {};' +
+				'var widgetGr = new GlideRecord("sp_widget");' +
+				'widgetGr.addQuery("sys_id", widgetSysId);' +
+				'widgetGr.addQuery("sys_updated_on", "<=", date);' +
+				'widgetGr.query();' +
+				'if (widgetGr.next()) {' +
+					'return {' +
+						'id: widgetGr.id.toString(),' +
+						'name: widgetGr.name.toString(),' +
+						'"public": !!widgetGr["public"],' +
+						'roles: widgetGr.roles.toString(),' +
+						'script: widgetGr.script.toString()' +
+					'};' +
+				'}' +
+			'})();', { widgetSysId: widgetSysId, date: date });
+
+		const updateWidget = this._execScript('global',
+			'(function () {' +
+				'var gdt = new GlideDateTime(date);' +
+				'var ms = gdt.getNumericValue();' +
+				'var dateCounter = Number(ms).toString(16) + "0000001";' +
+				'var versionGr = new GlideRecord("sys_update_version");' +
+				'versionGr.addQuery("state", "IN", ["current", "previous"]);' +
+				'versionGr.addQuery("name", "sp_widget_" + widgetSysId);' +
+				'versionGr.addQuery("sys_recorded_at", "<=", dateCounter);' +
+				'versionGr.orderByDesc("sys_recorded_at");' +
+				'versionGr.setLimit(1);' +
+				'versionGr.query();' +
+				'if (versionGr.next()) {' +
+					'var xml = new XMLDocument2();' +
+					'xml.parseXML(versionGr.payload);' +
+					'if (versionGr.action == "INSERT_OR_UPDATE") {' +
+						'return {' +
+							'id: xml.getNodeText("//record_update/sp_widget/id"),' +
+							'name: xml.getNodeText("//record_update/sp_widget/name"),' +
+							'"public": xml.getNodeText("//record_update/sp_widget/public") == "true",' +
+							'roles: xml.getNodeText("//record_update/sp_widget/roles"),' +
+							'script: xml.getNodeText("//record_update/sp_widget/script")' +
+						'};' +
+					'}' +
+				'}' +
+			'})();', { widgetSysId: widgetSysId, date: date });
+		
+		const widget = updateWidget || appFileWidget;
+		if (widget) {
+			widget.id = String(widget.id);
+			widget.name = String(widget.name);
+			widget.global = Boolean(widget.global);
+			widget.roles = String(widget.roles);
+			widget.script = String(widget.script);
+		}
+		
+		return widget;
+	},
+	
 	getHistoricACLs: function (tableName, date) {
 		let acls = this._execScript('global',
 			'(function () {' +
@@ -406,6 +464,7 @@ DLAUtil.prototype = {
 			if (widgetMatch && tableMatch) {
 				const widget = widgetMatch[1];
 				const table = tableMatch[1];
+				const widgetSysId = getWidgetSysId(widget);
 				const fieldMatch = transData[i].url.match(fieldRegex);
 				let field = '';
 				if (fieldMatch) {
@@ -418,12 +477,28 @@ DLAUtil.prototype = {
 				
 				if (!gs.tableExists(table)) {
 					analysisResult.prevented.push({
-						widget: getWidgetSysId(widget),
+						widget: widgetSysId,
 						table: table,
 						field: field,
 						leaked_fields: '',
 						transaction: transData[i].sys_id,
 						reason: 'invalid table accessed',
+						attempt_date: transData[i].date,
+						leak_size: transData[i].size,
+						acls: []
+					});
+					continue;
+				}
+				
+				const historicWidget = this.getHistoricWidget(widgetSysId, transData[i].date);
+				if (historicWidget && !historicWidget.public) {
+					analysisResult.prevented.push({
+						widget: widgetSysId,
+						table: table,
+						field: field,
+						leaked_fields: '',
+						transaction: transData[i].sys_id,
+						reason: 'widget not public',
 						attempt_date: transData[i].date,
 						leak_size: transData[i].size,
 						acls: []
@@ -443,7 +518,7 @@ DLAUtil.prototype = {
 					// if the table is not 'public', the simple list widget hasn't returned any results
 					// and as such the current table isn't subjected to a data leak (at least not through this widget)
 					analysisResult.prevented.push({
-						widget: getWidgetSysId(widget),
+						widget: widgetSysId,
 						table: table,
 						field: field,
 						leaked_fields: '',
@@ -481,7 +556,7 @@ DLAUtil.prototype = {
 				}
 				
 				analysisResult.breached.push({
-					widget: getWidgetSysId(widget),
+					widget: widgetSysId,
 					table: table,
 					field: field,
 					leaked_fields: leakedFields,
@@ -503,13 +578,13 @@ DLAUtil.prototype = {
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2023-10-20 16:17:18</sys_created_on>
         <sys_id>7ac95274978671103c2d3f56f053af95</sys_id>
-        <sys_mod_count>107</sys_mod_count>
+        <sys_mod_count>137</sys_mod_count>
         <sys_name>DLAUtil</sys_name>
         <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
         <sys_policy/>
         <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
         <sys_update_name>sys_script_include_7ac95274978671103c2d3f56f053af95</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2023-11-10 10:35:24</sys_updated_on>
+        <sys_updated_on>2023-11-20 16:09:12</sys_updated_on>
     </sys_script_include>
 </record_update>
