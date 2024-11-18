@@ -100,11 +100,13 @@
         <sys_class_name>sys_ui_page</sys_class_name>
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2023-10-29 22:29:44</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
         <sys_id>b068e6bb9782fd103c2d3f56f053af3d</sys_id>
         <sys_mod_count>45</sys_mod_count>
         <sys_name>leaks</sys_name>
         <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
         <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
         <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
         <sys_update_name>sys_ui_page_b068e6bb9782fd103c2d3f56f053af3d</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>

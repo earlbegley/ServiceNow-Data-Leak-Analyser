@@ -10,7 +10,9 @@ A "Historic ACL" is a ACL-like record that contains all relevant data (table, co
 If a given record is "exposed" via the Historic ACL, it was leaked when the table was queried via the 'Simple List'-Widget.&#13;
 &#13;
 This Script Include is exclusively accessed via the Scripted REST API '/api/x_376096_dla/public' (GlideScriptedHierarchicalWorker). </description>
+        <mobile_callable>false</mobile_callable>
         <name>DLAHistoricACLAnalyser</name>
+        <sandbox_callable>false</sandbox_callable>
         <script><![CDATA[/* global global, gs, x_376096_dla */
 /* global Class, GlideRecord, GlideSysAttachment, GlideTime */
 /* eslint no-undef: "error" */
@@ -346,11 +348,13 @@ DLAHistoricACLAnalyser.prototype = {
         <sys_class_name>sys_script_include</sys_class_name>
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2023-10-28 16:43:49</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
         <sys_id>63ae8c6b97067d103c2d3f56f053af34</sys_id>
         <sys_mod_count>79</sys_mod_count>
         <sys_name>DLAHistoricACLAnalyser</sys_name>
         <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
         <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
         <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
         <sys_update_name>sys_script_include_63ae8c6b97067d103c2d3f56f053af34</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>

@@ -43,10 +43,12 @@ DLAUIActionUtil.prototype = {
     <sys_update_version action="INSERT_OR_UPDATE">
         <action>DELETE</action>
         <application display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</application>
+        <comments/>
         <file_path/>
         <instance_id>65348116dbf0fb04b847ac44d496196d</instance_id>
         <instance_name>dev81254</instance_name>
         <name>sys_script_include_060447f6978ab9103c2d3f56f053afee</name>
+        <order/>
         <payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sys_script_include"&gt;&lt;sys_script_include action="INSERT_OR_UPDATE"&gt;&lt;access&gt;package_private&lt;/access&gt;&lt;active&gt;true&lt;/active&gt;&lt;api_name&gt;x_376096_dla.DLAUIActionUtil&lt;/api_name&gt;&lt;caller_access/&gt;&lt;client_callable&gt;false&lt;/client_callable&gt;&lt;description&gt;This Script Include is used as a utility to determine UI Action visibilities&lt;/description&gt;&lt;name&gt;DLAUIActionUtil&lt;/name&gt;&lt;script&gt;&lt;![CDATA[/* global Class, x_376096_dla, gs, sn_ws */
 /* eslint no-undef: "error" */
 var DLAUIActionUtil = Class.create();
@@ -89,6 +91,7 @@ DLAUIActionUtil.prototype = {
         <sys_class_name>sys_metadata_delete</sys_class_name>
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2023-10-29 09:10:16</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
         <sys_db_object display_value="" name="sys_script_include">sys_script_include</sys_db_object>
         <sys_id>01aac978fb6342c4968ad7e5a85da910</sys_id>
         <sys_metadata>060447f6978ab9103c2d3f56f053afee</sys_metadata>
@@ -97,6 +100,7 @@ DLAUIActionUtil.prototype = {
         <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
         <sys_parent/>
         <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
         <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
         <sys_scope_delete display_value="">018d62d8d4c944a6803460baf46bd164</sys_scope_delete>
         <sys_update_name>sys_script_include_060447f6978ab9103c2d3f56f053afee</sys_update_name>

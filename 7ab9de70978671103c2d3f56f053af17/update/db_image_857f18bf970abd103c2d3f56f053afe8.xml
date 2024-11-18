@@ -10,11 +10,13 @@
         <sys_class_name>db_image</sys_class_name>
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2023-10-29 12:17:06</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
         <sys_id>857f18bf970abd103c2d3f56f053afe8</sys_id>
         <sys_mod_count>2</sys_mod_count>
         <sys_name>x_376096_dla.dxc_technology_logo.png</sys_name>
         <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
         <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
         <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
         <sys_update_name>db_image_857f18bf970abd103c2d3f56f053afe8</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
@@ -27,6 +29,7 @@
         <chunk_size_bytes>700000</chunk_size_bytes>
         <compressed>true</compressed>
         <content_type>image/png</content_type>
+        <encryption_context/>
         <file_name>image</file_name>
         <hash>bab54666b6db9e984a9a6dc4abab1b6cb7568f57c6bd8305b7586f91d5bc8b4c</hash>
         <image_height>172</image_height>

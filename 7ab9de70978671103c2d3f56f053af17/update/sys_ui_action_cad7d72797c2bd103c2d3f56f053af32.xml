@@ -81,19 +81,21 @@ function cancelHistoricACLAnalysis() {
         <sys_class_name>sys_ui_action</sys_class_name>
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2023-10-29 07:10:09</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
         <sys_domain>global</sys_domain>
-        <sys_domain_path>/</sys_domain_path>
         <sys_id>cad7d72797c2bd103c2d3f56f053af32</sys_id>
         <sys_mod_count>1</sys_mod_count>
         <sys_name>Cancel Analysis</sys_name>
         <sys_overrides/>
         <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
         <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
         <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
         <sys_update_name>sys_ui_action_cad7d72797c2bd103c2d3f56f053af32</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
         <sys_updated_on>2023-10-30 10:13:32</sys_updated_on>
         <table>x_376096_dla_historic_acl</table>
+        <u_rfc/>
         <ui11_compatible>false</ui11_compatible>
         <ui16_compatible>false</ui16_compatible>
     </sys_ui_action>

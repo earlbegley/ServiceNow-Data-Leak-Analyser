@@ -37,10 +37,12 @@ DLAReportUtil.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
     <sys_update_version action="INSERT_OR_UPDATE">
         <action>DELETE</action>
         <application display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</application>
+        <comments/>
         <file_path/>
         <instance_id>65348116dbf0fb04b847ac44d496196d</instance_id>
         <instance_name>dev81254</instance_name>
         <name>sys_script_include_0862bfb4970e71103c2d3f56f053afc6</name>
+        <order/>
         <payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sys_script_include"&gt;&lt;sys_script_include action="INSERT_OR_UPDATE"&gt;&lt;access&gt;public&lt;/access&gt;&lt;active&gt;true&lt;/active&gt;&lt;api_name&gt;x_376096_dla.DLAReportUtil&lt;/api_name&gt;&lt;caller_access/&gt;&lt;client_callable&gt;true&lt;/client_callable&gt;&lt;description/&gt;&lt;name&gt;DLAReportUtil&lt;/name&gt;&lt;script&gt;&lt;![CDATA[var DLAReportUtil = Class.create();
 DLAReportUtil.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
     initialize: function () {
@@ -77,6 +79,7 @@ DLAReportUtil.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
         <sys_class_name>sys_metadata_delete</sys_class_name>
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2023-10-28 16:22:44</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
         <sys_db_object display_value="" name="sys_script_include">sys_script_include</sys_db_object>
         <sys_id>a81b1c68efef492085421ee401e02910</sys_id>
         <sys_metadata>0862bfb4970e71103c2d3f56f053afc6</sys_metadata>
@@ -85,6 +88,7 @@ DLAReportUtil.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
         <sys_package display_value="Data Leak Analyser" source="x_376096_dla">7ab9de70978671103c2d3f56f053af17</sys_package>
         <sys_parent/>
         <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
         <sys_scope display_value="Data Leak Analyser">7ab9de70978671103c2d3f56f053af17</sys_scope>
         <sys_scope_delete display_value="">018d62d8d4c944a6803460baf46bd164</sys_scope_delete>
         <sys_update_name>sys_script_include_0862bfb4970e71103c2d3f56f053afc6</sys_update_name>
